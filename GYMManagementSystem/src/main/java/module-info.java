@@ -1,4 +1,4 @@
-module com.example.employeemanagementsystem {
+module com.example.GYMmanagementsystem {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.web;

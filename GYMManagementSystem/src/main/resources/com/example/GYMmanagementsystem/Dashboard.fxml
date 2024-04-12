@@ -193,19 +193,19 @@
                                     <String fx:value="top-form" />
                                  </styleClass>
                                  <children>
-                                    <TableView fx:id="FS_Table_View" layoutX="6.0" layoutY="52.0" prefHeight="195.0" prefWidth="879.0">
+                                    <TableView fx:id="FS_Table_View" layoutX="6.0" layoutY="52.0" onMouseClicked="#FollowSubsSelect" prefHeight="195.0" prefWidth="879.0">
                                       <columns>
                                         <TableColumn fx:id="FS_TableCol_ClientId" prefWidth="71.9999828338623" text="Client Id" />
-                                        <TableColumn fx:id="FS_TableCol_FirstName" prefWidth="92.66669464111328" text="First Name" />
-                                          <TableColumn fx:id="FS_TableCol_LastName" prefWidth="125.99998474121094" text="Last Name" />
-                                          <TableColumn fx:id="FS_TableCol_Gender" prefWidth="87.0" text="Gender" />
-                                          <TableColumn fx:id="FS_TableCol_Phone" prefWidth="118.66671752929688" text="Phone" />
-                                          <TableColumn fx:id="FS_TableCol_Gmail" prefWidth="140.00009155273438" text="Gmail" />
-                                          <TableColumn fx:id="FS_TableCol_Cin" minWidth="0.0" prefWidth="109.33331298828125" text="Cin" />
-                                          <TableColumn fx:id="FS_TableCol_StartDate" prefWidth="130.66668701171875" text="Start date" />
+                                        <TableColumn fx:id="FS_TableCol_FirstName" prefWidth="100.66665649414062" text="First Name" />
+                                          <TableColumn fx:id="FS_TableCol_LastName" prefWidth="118.66668701171875" text="Last Name" />
+                                          <TableColumn fx:id="FS_TableCol_Gender" prefWidth="75.99993896484375" text="Gender" />
+                                          <TableColumn fx:id="FS_TableCol_Cin" minWidth="0.0" prefWidth="113.3333740234375" text="Cin" />
+                                          <TableColumn fx:id="FS_TableCol_Gmail" prefWidth="150.66668701171875" text="Gmail" />
+                                          <TableColumn fx:id="FS_TableCol_Phone" prefWidth="134.0" text="Phone" />
+                                          <TableColumn fx:id="FS_TableCol_StartDate" prefWidth="115.3333740234375" text="Start date" />
                                       </columns>
                                     </TableView>
-                                    <TextField fx:id="FS_search_tf" alignment="CENTER" layoutX="33.0" layoutY="14.0" prefHeight="31.0" prefWidth="208.0" promptText="search" styleClass="search" stylesheets="@DashboardStyle.css" />
+                                    <TextField fx:id="FS_search_tf" alignment="CENTER" layoutX="33.0" layoutY="14.0" onKeyPressed="#FollowSubsSearch" prefHeight="31.0" prefWidth="208.0" promptText="search" styleClass="search" stylesheets="@DashboardStyle.css" />
                                     <FontAwesomeIcon glyphName="SEARCH" layoutX="38.0" layoutY="38.0" size="2em" />
                                  </children>
                               </AnchorPane>
@@ -214,7 +214,7 @@
                                  <font>
                                     <Font name="Tahoma" size="14.0" />
                                  </font></Label>
-                              <TextField fx:id="FS_FirstNametf" layoutX="91.0" layoutY="320.0" prefHeight="32.0" prefWidth="149.0" promptText="First Name" styleClass="textfield" stylesheets="@DashboardStyle.css" />
+                              <TextField fx:id="FS_FirstName_tf" layoutX="91.0" layoutY="320.0" prefHeight="32.0" prefWidth="149.0" promptText="First Name" styleClass="textfield" stylesheets="@DashboardStyle.css" />
                               <Label layoutX="8.0" layoutY="326.0" prefHeight="21.0" prefWidth="79.0" text="First Name :">
                                  <font>
                                     <Font name="Tahoma" size="14.0" />
@@ -244,17 +244,17 @@
                                  <font>
                                     <Font name="Tahoma" size="14.0" />
                                  </font></Label>
-                              <Button fx:id="FS_Delete_Button" layoutX="296.0" layoutY="454.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="92.0" stylesheets="@DashboardStyle.css" text="DELETE">
+                              <Button fx:id="FS_Delete_Button" layoutX="296.0" layoutY="454.0" mnemonicParsing="false" onAction="#FollowSubsDelete" prefHeight="35.0" prefWidth="92.0" stylesheets="@DashboardStyle.css" text="DELETE">
                                  <styleClass>
                                     <String fx:value="delete-btn" />
                                     <String fx:value="shadow" />
                                  </styleClass></Button>
-                              <Button fx:id="FS_Update_Button" layoutX="397.0" layoutY="454.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="89.0" stylesheets="@DashboardStyle.css" text="UPDATE">
+                              <Button fx:id="FS_Update_Button" layoutX="397.0" layoutY="454.0" mnemonicParsing="false" onAction="#FollowSubsUpdate" prefHeight="35.0" prefWidth="89.0" stylesheets="@DashboardStyle.css" text="UPDATE">
                                  <styleClass>
                                     <String fx:value="update-btn" />
                                     <String fx:value="shadow" />
                                  </styleClass></Button>
-                              <Button fx:id="FS_Add_Button" layoutX="494.0" layoutY="454.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="84.0" stylesheets="@DashboardStyle.css" text="ADD">
+                              <Button fx:id="FS_Add_Button" layoutX="494.0" layoutY="454.0" mnemonicParsing="false" onAction="#FollowSubsAdd" prefHeight="35.0" prefWidth="84.0" stylesheets="@DashboardStyle.css" text="ADD">
                                  <styleClass>
                                     <String fx:value="add-btn" />
                                     <String fx:value="shadow" />

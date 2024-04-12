@@ -3,7 +3,7 @@ package com.example.GYMmanagementsystem;
 import java.sql.Date;
 
 public class Client {
-    private String clientId;
+    private Integer clientId;
     private String firstName;
     private String lastName;
     private String gender;
@@ -12,7 +12,7 @@ public class Client {
     private String cin;
     private Date startDate;
 
-    public Client(String clientId, String firstName, String lastName, String gender, String phone,String gmail,String cin, Date startDate){
+    public Client(Integer clientId, String firstName, String lastName, String gender, String phone,String gmail,String cin, Date startDate){
         this.clientId = clientId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -23,7 +23,7 @@ public class Client {
         this.startDate = startDate;
     }
 
-    public String ClientId(){
+    public Integer getClientId(){
         return clientId;
     }
     public String getFirstName(){
