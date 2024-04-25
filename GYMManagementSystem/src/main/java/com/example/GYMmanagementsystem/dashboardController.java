@@ -10,6 +10,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
@@ -22,9 +24,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.Date;
+import java.time.Year;
+import java.util.*;
 
 public class dashboardController implements Initializable {
     @FXML
@@ -42,13 +43,172 @@ public class dashboardController implements Initializable {
     //start home form (this part for youssef) you can whatever you want
     @FXML
     private AnchorPane home_form;
+    private final int  PRICE = 100;
     @FXML
-    private Label total_gain_label;
+    private Label dash_tg;
+    //Today's new clients placeholder
     @FXML
-    private Label total_client_label;
+    private Label dash_tnc;
+    //Today's quit clients placeholder
     @FXML
-    private Label inactive_client_label;
+    private Label dash_tcq;
+    //Dashboard chart
+    @FXML
+    private AreaChart dash_chart;
+    @FXML
+    private ComboBox years_list;
+    @FXML
+    private ComboBox criterias_list;
+    //Get criterias list
+    public void criteriasList(){
+        String criterias []= {"Income","New Clients","Quit Clients"};
+        List<String> criteriasList = new ArrayList<>();
+        for(String data: criterias){
+            criteriasList.add(data);
+        }
+
+        ObservableList listData = FXCollections.observableArrayList(criteriasList);
+        criterias_list.setItems(listData);
+    }
+    //Get years list
+    public void yearsList() {
+        List<Integer> yearsList = new ArrayList<>();
+        int currentYear = Year.now().getValue(); // Get the current year
+        for (int i = 0; i < 5; i++) {
+            yearsList.add(currentYear - i); // Add the current year and the 4 previous years
+        }
+
+        ObservableList listData = FXCollections.observableArrayList(yearsList);
+        years_list.setItems(listData);
+    }
+
+    //Start Overview
+    // Today's Gain
+    public void dashboardTG() {
+        String sql = "SELECT COUNT(*) AS todayPayNum FROM payment WHERE PaymentDate = CURDATE();";
+        connect = Database.connectDB();
+        int todaysGain = 0; // Change data type to int
+        try {
+            prepare = connect.prepareStatement(sql);
+            result = prepare.executeQuery();
+            if (result.next()) {
+                todaysGain = result.getInt("todayPayNum") * PRICE;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        dash_tg.setText(String.valueOf(todaysGain));
+    }
+
+    // Today's New Clients
+    public void dashboardTNC() {
+        String sql = "SELECT COUNT(*) AS todaysNewClients FROM client WHERE StartDate = CURDATE();";
+        connect = Database.connectDB();
+        int todaysNewClients = 0;
+        try {
+            prepare = connect.prepareStatement(sql);
+            result = prepare.executeQuery();
+            if (result.next()) {
+                todaysNewClients = result.getInt("todaysNewClients");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        dash_tnc.setText(String.valueOf(todaysNewClients));
+    }
+
+    // Today's Clients That Quit
+    public void dashboardTCQ() {
+        String sql = "SELECT COUNT(*) AS todaysClientsQuit FROM client WHERE QuitDate = CURDATE();";
+        connect = Database.connectDB();
+        int todaysClientsQuit = 0;
+        try {
+            prepare = connect.prepareStatement(sql);
+            result = prepare.executeQuery();
+            if (result.next()) {
+                todaysClientsQuit = result.getInt("todaysClientsQuit");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        dash_tcq.setText(String.valueOf(todaysClientsQuit));
+    }
+    //End overview
+
+    //Start dashboard chart
+    public String toCamelCase(String text){
+        String[] words = text.split("[\\W_]+");
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < words.length; i++) {
+            String word = words[i];
+            if (i == 0) {
+                word = word.isEmpty() ? word : word.toLowerCase();
+            } else {
+                word = word.isEmpty() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1).toLowerCase();
+            }
+            builder.append(word);
+        }
+        return builder.toString();
+    }
+    public void updateChart() {
+        dash_chart.getData().clear();
+        String selectedYear = years_list.getSelectionModel().getSelectedItem().toString();
+        String selectedCriteria = criterias_list.getSelectionModel().getSelectedItem().toString();
+        if(selectedCriteria == null || selectedYear == null){
+            return;
+        }
+        dash_chart.setTitle(selectedCriteria +" Chart");
+        String sql = "";
+
+        sql = switch (selectedCriteria) {
+            case "Income" -> "SELECT YEAR(paymentDate) AS year, MONTH(paymentDate) AS month, COUNT(*) AS numOfPay " +
+                    "FROM payment " +
+                    "WHERE paymentDate BETWEEN ? AND ? " +
+                    "GROUP BY YEAR(paymentDate), MONTH(paymentDate) " +
+                    "ORDER BY year DESC, month ASC";
+            case "New Clients" -> "SELECT YEAR(StartDate) AS year, MONTH(StartDate) AS month, COUNT(*) AS newClients " +
+                    "FROM client " +
+                    "WHERE StartDate BETWEEN ? AND ? " +
+                    "GROUP BY YEAR(StartDate), MONTH(StartDate) " +
+                    "ORDER BY year, month";
+            case "Quit Clients" -> "SELECT YEAR(QuitDate) AS year, MONTH(QuitDate) AS month, COUNT(*) AS quitClients " +
+                    "FROM client " +
+                    "WHERE QuitDate BETWEEN ? AND ? " +
+                    "GROUP BY YEAR(QuitDate), MONTH(QuitDate) " +
+                    "ORDER BY year, month";
+            default -> null;
+        };
+
+        connect = Database.connectDB();
+        XYChart.Series series = new XYChart.Series<>();
+        try {
+            prepare = connect.prepareStatement(sql);
+            // Replace placeholders with the selected year
+            prepare.setString(1, selectedYear + "-01-01"); // Start date of the selected year
+            prepare.setString(2, selectedYear + "-12-31"); // End date of the selected year
+            result = prepare.executeQuery();
+
+            while (result.next()) {
+                String date = result.getString("year") + "-" + result.getString("month");
+                int value = 0;
+                if(selectedCriteria.equals("Income")) {
+                    value = result.getInt("numOfPay") * PRICE;
+                } else {
+                    value = result.getInt(toCamelCase(selectedCriteria));
+                }
+                series.getData().add(new XYChart.Data(date, value));
+            }
+
+            dash_chart.getData().add(series);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //End dashboard chart
+
     //end home form
+
 
     //start follow subsriptions
     @FXML
@@ -146,7 +306,7 @@ public class dashboardController implements Initializable {
         ObservableList<String> options = FXCollections.observableArrayList("male", "female");
         FS_Gender_combobox.setItems(options);
     }
-     //this function for extracting the client data from the database and store them into list
+    //this function for extracting the client data from the database and store them into list
     public ObservableList<Client> FollowSubsListData() {
 
         ObservableList<Client> listData = FXCollections.observableArrayList();
@@ -180,12 +340,12 @@ public class dashboardController implements Initializable {
     //this function for showing the list that contain client data in tableview
     private ObservableList<Client> clientListData;
     public void FollowSubsShowListData() {
-         clientListData= FollowSubsListData();
-         FS_TableCol_ClientId.setCellValueFactory(new PropertyValueFactory<>("clientId"));
+        clientListData= FollowSubsListData();
+        FS_TableCol_ClientId.setCellValueFactory(new PropertyValueFactory<>("clientId"));
         FS_TableCol_FirstName.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         FS_TableCol_LastName.setCellValueFactory(new PropertyValueFactory<>("lastName"));
         FS_TableCol_Gender.setCellValueFactory(new PropertyValueFactory<>("gender"));
-       FS_TableCol_Phone.setCellValueFactory(new PropertyValueFactory<>("phone"));
+        FS_TableCol_Phone.setCellValueFactory(new PropertyValueFactory<>("phone"));
         FS_TableCol_Gmail.setCellValueFactory(new PropertyValueFactory<>("gmail"));
         FS_TableCol_Cin.setCellValueFactory(new PropertyValueFactory<>("cin"));
         FS_TableCol_StartDate.setCellValueFactory(new PropertyValueFactory<>("startDate"));
@@ -227,46 +387,45 @@ public class dashboardController implements Initializable {
                 alert.setContentText("Please fill all blank fields");
                 alert.showAndWait();
             }else{
-                    String check = "SELECT ClientId FROM client WHERE clientId = '"
-                            + FS_ClientId_tf.getText() + "'";
+                String check = "SELECT ClientId FROM client WHERE clientId = '"
+                        + FS_ClientId_tf.getText() + "'";
 
-                    statement = connect.createStatement();
-                    result = statement.executeQuery(check);
+                statement = connect.createStatement();
+                result = statement.executeQuery(check);
 
-                    if (result.next()) {
-                        alert = new Alert(Alert.AlertType.ERROR);
-                        alert.setTitle("Error Message");
-                        alert.setHeaderText(null);
-                        alert.setContentText("ClienID : " + FS_ClientId_tf.getText() + " was already exist!");
-                        alert.showAndWait();
-                    } else {
-                        Date date = new Date();
-                        java.sql.Date sqldate = new java.sql.Date(date.getTime());
-                        String sql = "INSERT INTO client (ClientID, FirstName, LastName, Phone, Gmail, Cin, gender,startDate)"
-                                + "VALUES(?,?,?,?,?,?,?,?)";
-                        prepare = connect.prepareStatement(sql);
-                        prepare.setString(1, FS_ClientId_tf.getText());
-                        prepare.setString(2, FS_FirstName_tf.getText());
-                        prepare.setString(3, FS_LastName_tf.getText());
-                        prepare.setString(4, FS_Phone_tf.getText());
-                        prepare.setString(5, FS_Gmail_tf.getText());
-                        prepare.setString(6, FS_Cin_tf.getText());
-                        prepare.setString(7, (String) FS_Gender_combobox.getSelectionModel().getSelectedItem());
-                        prepare.setString(8,String.valueOf(sqldate));
-                        prepare.executeUpdate();
-                        alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Information Message");
-                        alert.setHeaderText(null);
-                        alert.setContentText("Successfully Added!");
-                        alert.showAndWait();
-                        FollowSubsShowListData();
-                        FollowSubsReset();
-
-                    }
+                if (result.next()) {
+                    alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error Message");
+                    alert.setHeaderText(null);
+                    alert.setContentText("ClienID : " + FS_ClientId_tf.getText() + " was already exist!");
+                    alert.showAndWait();
+                } else {
+                    Date date = new Date();
+                    java.sql.Date sqldate = new java.sql.Date(date.getTime());
+                    String sql = "INSERT INTO client (ClientID, FirstName, LastName, Phone, Gmail, Cin, Gender,StartDate)"
+                            + "VALUES(?,?,?,?,?,?,?,?)";
+                    prepare = connect.prepareStatement(sql);
+                    prepare.setString(1, FS_ClientId_tf.getText());
+                    prepare.setString(2, FS_FirstName_tf.getText());
+                    prepare.setString(3, FS_LastName_tf.getText());
+                    prepare.setString(4, FS_Phone_tf.getText());
+                    prepare.setString(5, FS_Gmail_tf.getText());
+                    prepare.setString(6, FS_Cin_tf.getText());
+                    prepare.setString(7, (String) FS_Gender_combobox.getSelectionModel().getSelectedItem());
+                    prepare.setString(8,String.valueOf(sqldate));
+                    prepare.executeUpdate();
+                    alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Information Message");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Successfully Added!");
+                    alert.showAndWait();
+                    FollowSubsShowListData();
+                    FollowSubsReset();
+                }
             }
         }catch (Exception e) {
-                e.printStackTrace();
-            }
+            e.printStackTrace();
+        }
     }
     //this function for update client information
     public void FollowSubsUpdate(){
@@ -292,7 +451,7 @@ public class dashboardController implements Initializable {
                 alert.setContentText("Are you sure you want to UPDATE Client ID: " + FS_ClientId_tf.getText() + "?");
                 Optional<ButtonType> option = alert.showAndWait();
                 if(option.get().equals(ButtonType.OK) ){
-                    String sqlUpdate = " UPDATE client SET FirstName = ?, LastName = ?, Phone = ?, Gmail = ?, Cin = ?, gender = ?"
+                    String sqlUpdate = " UPDATE client SET FirstName = ?, LastName = ?, Phone = ?, Gmail = ?, Cin = ?, Gender = ?"
                             +"WHERE ClientId ='"+FS_ClientId_tf.getText()+"'";
                     prepare = connect.prepareStatement(sqlUpdate);
                     prepare.setString(1, FS_FirstName_tf.getText());
@@ -405,7 +564,6 @@ public class dashboardController implements Initializable {
     }
 
     public void switchForm(ActionEvent event) {
-
         if (event.getSource() == Home_button ) {
             home_form.setVisible(true);
             follow_subsriptions_form.setVisible(false);
@@ -415,7 +573,19 @@ public class dashboardController implements Initializable {
             follow_subscriptions_button.setStyle("-fx-background-color:transparent");
             Paiement_button.setStyle("-fx-background-color:transparent");
 
+            //1- Start Overview
+            //Today's gain
+            dashboardTG();
+            //Today's new clients
+            dashboardTNC();
+            //Today's quit clients
+            dashboardTCQ();
+            //End Overview
 
+            //2- Start Dashboard chart
+            criteriasList();
+            yearsList();
+            updateChart();
         } else if (event.getSource() == follow_subscriptions_button) {
             home_form.setVisible(false);
             follow_subsriptions_form.setVisible(true);
@@ -504,9 +674,20 @@ public class dashboardController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        //I- Dashboard
+        //1- Start Overview
+        //Today's gain
+        dashboardTG();
+        //Today's new clients
+        dashboardTNC();
+        //Today's quit clients
+        dashboardTCQ();
+        //2- Dashboard chart
+        criteriasList();
+        yearsList();
+        dash_chart.setTitle("");
         FollowSubsSelect();
         FollowSubsShowListData();
         FollowSubsGenderList();
-
     }
 }

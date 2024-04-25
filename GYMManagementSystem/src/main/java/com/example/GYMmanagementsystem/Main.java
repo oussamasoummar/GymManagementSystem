@@ -15,7 +15,7 @@ public class Main extends Application {
     private  double y = 0;
     @Override
     public void start(Stage stage) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("LoginController.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("LogInPage.fxml"));
         Scene scene = new Scene(root);
         root.setOnMousePressed( (MouseEvent event)-> {
             x = event.getSceneX();

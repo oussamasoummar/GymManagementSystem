@@ -2,6 +2,9 @@
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon?>
 <?import java.lang.String?>
+<?import javafx.scene.chart.AreaChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
@@ -22,7 +25,7 @@
                <top>
                   <AnchorPane prefHeight="35.0" prefWidth="1100.0" styleClass="semi-top-form" stylesheets="@DashboardStyle.css" BorderPane.alignment="CENTER">
                      <children>
-                        <AnchorPane layoutX="0.6666666666666666" layoutY="-2.0" prefHeight="29.0" prefWidth="1099.0" styleClass="top-form" stylesheets="@DashboardStyle.css" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="-2.0">
+                        <AnchorPane layoutX="0.6666666666666666" layoutY="-2.0" prefHeight="41.0" prefWidth="1100.0" styleClass="top-form" stylesheets="@DashboardStyle.css" AnchorPane.bottomAnchor="-4.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="-2.0">
                            <children>
                               <FontAwesomeIcon glyphName="USERS" layoutX="9.0" layoutY="20.0" size="1.5em" />
                               <Label layoutX="36.0" layoutY="3.0" prefHeight="23.0" prefWidth="187.0" text="GYM Management System" />
@@ -90,7 +93,7 @@
                                     <Font name="Tahoma" size="14.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="Logout" layoutX="1.0" layoutY="473.0" mnemonicParsing="false" onAction="#logout" stylesheets="@DashboardStyle.css">
+                              <Button fx:id="Logout" layoutX="17.0" layoutY="491.0" mnemonicParsing="false" onAction="#logout" stylesheets="@DashboardStyle.css">
                                  <graphic>
                                     <FontAwesomeIcon glyphName="SIGN_OUT" size="2em" text="" />
                                  </graphic>
@@ -99,7 +102,7 @@
                                     <String fx:value="shadow" />
                                  </styleClass>
                               </Button>
-                              <Label layoutX="42.0" layoutY="481.0" prefHeight="20.0" prefWidth="65.0" text="Log Out" textFill="WHITE">
+                              <Label layoutX="71.0" layoutY="498.0" onMouseClicked="#logout" prefHeight="20.0" prefWidth="65.0" styleClass="log-out" text="Log Out" textFill="WHITE">
                                  <font>
                                     <Font size="14.0" />
                                  </font>
@@ -112,69 +115,92 @@
                <center>
                   <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                      <children>
-                        <AnchorPane fx:id="home_form" layoutX="-0.6666666666666666" layoutY="2.0" prefHeight="556.0" prefWidth="907.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-1.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="2.0">
+                        <AnchorPane fx:id="home_form" layoutX="-0.6666666666666666" layoutY="2.0" prefHeight="563.0" prefWidth="898.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-1.0" AnchorPane.rightAnchor="9.0" AnchorPane.topAnchor="2.0">
                            <children>
-                              <AnchorPane layoutX="8.0" layoutY="9.0" prefHeight="532.0" prefWidth="895.0" stylesheets="@DashboardStyle.css">
+                              <AnchorPane layoutX="-3.0" layoutY="21.0" prefHeight="524.0" prefWidth="857.0" stylesheets="@DashboardStyle.css">
                                  <styleClass>
                                     <String fx:value="white-bg" />
                                     <String fx:value="shadow" />
                                  </styleClass>
                                  <children>
-                                    <AnchorPane layoutX="1.0" prefHeight="208.0" prefWidth="889.0" stylesheets="@DashboardStyle.css">
+                                    <AnchorPane fx:id="dash_form" layoutX="1.0" prefHeight="209.0" prefWidth="888.0" stylesheets="@DashboardStyle.css">
                                        <styleClass>
                                           <String fx:value="white-bg" />
                                           <String fx:value="shadow" />
                                        </styleClass>
                                        <children>
-                                          <AnchorPane layoutX="26.0" layoutY="43.0" prefHeight="127.0" prefWidth="200.0" stylesheets="@DashboardStyle.css">
+                                          <AnchorPane layoutX="26.0" layoutY="43.0" prefHeight="127.0" prefWidth="235.0" stylesheets="@DashboardStyle.css">
                                              <children>
-                                                <FontAwesomeIcon fill="WHITE" glyphName="DOLLAR" layoutX="138.0" layoutY="66.0" size="5em" text="" wrappingWidth="34.28571319580078" />
-                                                <Label alignment="CENTER_RIGHT" layoutX="45.0" layoutY="79.0" prefHeight="25.0" prefWidth="129.0" styleClass="nav-button" stylesheets="@DashboardStyle.css" text="TOTAL Gain" textFill="WHITE">
+                                                <Label alignment="CENTER" layoutX="36.0" layoutY="88.0" prefHeight="25.0" prefWidth="129.0" styleClass="nav-button" stylesheets="@DashboardStyle.css" text="TODAY's Gain" textFill="WHITE">
                                                    <font>
                                                       <Font size="18.0" />
                                                    </font>
                                                 </Label>
-                                                <Label fx:id="total_gain_label" alignment="TOP_LEFT" layoutX="31.0" prefHeight="47.0" prefWidth="26.0" stylesheets="@DashboardStyle.css" text="0" textFill="WHITE">
+                                                <FontAwesomeIcon fill="WHITE" glyphName="DOLLAR" layoutX="172.0" layoutY="63.0" size="4.5em" wrappingWidth="50.28571319580078" />
+                                                <Label fx:id="dash_tg" layoutX="33.0" layoutY="32.0" text="0" textFill="WHITE">
                                                    <font>
-                                                      <Font size="47.0" />
+                                                      <Font size="32.0" />
                                                    </font>
                                                 </Label>
                                              </children>
                                              <styleClass>
                                                 <String fx:value="nav-form" />
+                                                <String fx:value="snippets" />
                                                 <String fx:value="shadow" />
                                              </styleClass>
                                           </AnchorPane>
-                                          <AnchorPane layoutX="304.0" layoutY="43.0" prefHeight="127.0" prefWidth="225.0" styleClass="nav-form" stylesheets="@DashboardStyle.css">
+                                          <AnchorPane layoutX="332.0" layoutY="41.0" prefHeight="127.0" prefWidth="227.0" stylesheets="@DashboardStyle.css">
                                              <children>
-                                                <FontAwesomeIcon fill="WHITE" glyphName="USER" layoutX="155.0" layoutY="66.0" size="5em" text="" />
-                                                <Label alignment="CENTER_RIGHT" layoutX="33.0" layoutY="75.0" prefHeight="25.0" prefWidth="129.0" styleClass="nav-button" stylesheets="@DashboardStyle.css" text="TOTAL Client" textFill="WHITE">
+                                                <Label alignment="CENTER_RIGHT" layoutX="25.0" layoutY="88.0" prefHeight="25.0" prefWidth="167.0" styleClass="nav-button" stylesheets="@DashboardStyle.css" text="TODAY's New Clients" textFill="WHITE">
                                                    <font>
                                                       <Font size="18.0" />
                                                    </font>
                                                 </Label>
-                                                <Label fx:id="total_client_label" alignment="TOP_LEFT" layoutX="33.0" prefHeight="47.0" prefWidth="26.0" stylesheets="@DashboardStyle.css" text="0" textFill="WHITE">
+                                                <Label fx:id="dash_tnc" alignment="TOP_LEFT" layoutX="26.0" layoutY="32.0" prefHeight="47.0" prefWidth="26.0" stylesheets="@DashboardStyle.css" text="0" textFill="WHITE">
                                                    <font>
-                                                      <Font size="47.0" />
+                                                      <Font size="32.0" />
                                                    </font>
                                                 </Label>
+                                                <FontAwesomeIcon fill="WHITE" glyphName="USERS" layoutX="138.0" layoutY="65.0" size="4.5em" text="" wrappingWidth="34.28571319580078" />
                                              </children>
+                                             <styleClass>
+                                                <String fx:value="nav-form" />
+                                                <String fx:value="snippets" />
+                                             </styleClass>
                                           </AnchorPane>
-                                          <AnchorPane layoutX="624.0" layoutY="42.0" prefHeight="127.0" prefWidth="200.0" styleClass="nav-form" stylesheets="@DashboardStyle.css">
+                                          <AnchorPane layoutX="624.0" layoutY="42.0" prefHeight="127.0" prefWidth="236.0" stylesheets="@DashboardStyle.css">
                                              <children>
-                                                <FontAwesomeIcon fill="WHITE" glyphName="MINUS" layoutX="140.0" layoutY="65.0" size="5em" />
-                                                <Label alignment="CENTER_RIGHT" layoutX="43.0" layoutY="76.0" prefHeight="25.0" prefWidth="129.0" styleClass="nav-button" stylesheets="@DashboardStyle.css" text="INACTIVE Client" textFill="WHITE">
+                                                <FontAwesomeIcon fill="WHITE" glyphName="MINUS" layoutX="155.0" layoutY="64.0" size="5em" text="" />
+                                                <Label alignment="CENTER_RIGHT" layoutX="36.0" layoutY="88.0" prefHeight="25.0" prefWidth="162.0" styleClass="nav-button" stylesheets="@DashboardStyle.css" text="TODAY's Quit Clients" textFill="WHITE">
                                                    <font>
                                                       <Font size="18.0" />
                                                    </font>
                                                 </Label>
-                                                <Label fx:id="inactive_client_label" alignment="TOP_LEFT" layoutX="30.0" prefHeight="47.0" prefWidth="26.0" stylesheets="@DashboardStyle.css" text="0" textFill="WHITE">
+                                                <Label fx:id="dash_tcq" alignment="TOP_LEFT" layoutX="30.0" layoutY="30.0" prefHeight="47.0" prefWidth="26.0" stylesheets="@DashboardStyle.css" text="0" textFill="WHITE">
                                                    <font>
-                                                      <Font size="47.0" />
+                                                      <Font size="32.0" />
                                                    </font>
                                                 </Label>
                                              </children>
+                                             <styleClass>
+                                                <String fx:value="nav-form" />
+                                                <String fx:value="snippets" />
+                                             </styleClass>
                                           </AnchorPane>
+                                       </children>
+                                    </AnchorPane>
+                                    <AnchorPane layoutX="10.0" layoutY="221.0" prefHeight="303.0" prefWidth="875.0">
+                                       <children>
+                                          <AreaChart fx:id="dash_chart" layoutX="-7.0" prefHeight="273.0" prefWidth="890.0" title="Income Data Chart" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="-7.0" AnchorPane.rightAnchor="-8.0" AnchorPane.topAnchor="0.0">
+                                            <xAxis>
+                                              <CategoryAxis side="BOTTOM" />
+                                            </xAxis>
+                                            <yAxis>
+                                              <NumberAxis side="LEFT" />
+                                            </yAxis>
+                                          </AreaChart>
+                                          <ComboBox fx:id="years_list" layoutX="30.0" layoutY="251.0" onAction="#updateChart" prefWidth="150.0" promptText="Select Year" />
+                                          <ComboBox fx:id="criterias_list" layoutX="204.0" layoutY="251.0" onAction="#updateChart" prefWidth="150.0" promptText="Select Criteria" />
                                        </children>
                                     </AnchorPane>
                                  </children>

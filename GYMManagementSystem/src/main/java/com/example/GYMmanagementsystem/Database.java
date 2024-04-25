@@ -10,7 +10,7 @@ public class Database {
 
     public static  Connection connectDB(){
         try {
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/loginjava","root","Ouss@m@soummar123");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/loginjava","youssef","YOUSSEF@123ou");
             return connection;
         }catch (Exception e){e.printStackTrace();}
         return null;
