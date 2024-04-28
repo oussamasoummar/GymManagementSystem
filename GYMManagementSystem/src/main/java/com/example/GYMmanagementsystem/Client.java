@@ -11,8 +11,9 @@ public class Client {
     private String gmail;
     private String cin;
     private Date startDate;
+    private Date ExpirationDate;
 
-    public Client(Integer clientId, String firstName, String lastName, String gender, String phone,String gmail,String cin, Date startDate){
+    public Client(Integer clientId, String firstName, String lastName, String gender, String phone,String gmail,String cin, Date startDate,Date ExpirationDate){
         this.clientId = clientId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -21,6 +22,7 @@ public class Client {
         this.cin = cin;
         this.gender = gender;
         this.startDate = startDate;
+        this.ExpirationDate=ExpirationDate;
     }
 
     public Integer getClientId(){
@@ -49,7 +51,8 @@ public class Client {
     public String getGmail() {
         return gmail;
     }
-
+    public Date getExpirationDate(){
+        return ExpirationDate;
+    }
 
 }
-
