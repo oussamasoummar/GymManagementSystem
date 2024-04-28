@@ -85,14 +85,14 @@ public class dashboardController implements Initializable {
     //Start Overview
     // Today's Gain
     public void dashboardTG() {
-        String sql = "SELECT COUNT(*) AS todayPayNum FROM payment WHERE PaymentDate = CURDATE();";
+        String sql = "SELECT SUM(Amount) AS todayPayNum FROM payment WHERE PaymentDate = CURDATE();";
         connect = Database.connectDB();
         int todaysGain = 0; // Change data type to int
         try {
             prepare = connect.prepareStatement(sql);
             result = prepare.executeQuery();
             if (result.next()) {
-                todaysGain = result.getInt("todayPayNum") * PRICE;
+                todaysGain = result.getInt("todayPayNum") ;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -266,15 +266,17 @@ public class dashboardController implements Initializable {
     @FXML
     private TextField Paiement_ClientId_tf ;
     @FXML
-    private Label Paiement_firstName_label;
+    private TextField Paiement_firstName;
     @FXML
-    private Label Paiement_lastName_label;
+    private TextField Paiement_lastName;
     @FXML
     private Button Paiement_Payer_Button;
     @FXML
     private Button Paiement_Clear_Button;
     @FXML
     private TextField Paiement_Mois_tf;
+    @FXML
+    private Label Amount_Label;
     @FXML
     private TableView<Client> Paiement_tableView;
     @FXML
@@ -327,7 +329,7 @@ public class dashboardController implements Initializable {
                         result.getString("phone"),
                         result.getString("Gmail"),
                         result.getString("Cin"),
-                        result.getDate("startDate"));
+                        result.getDate("startDate"),result.getDate("ExpirationDate"));
                 listData.add(client);
 
             }
@@ -402,8 +404,8 @@ public class dashboardController implements Initializable {
                 } else {
                     Date date = new Date();
                     java.sql.Date sqldate = new java.sql.Date(date.getTime());
-                    String sql = "INSERT INTO client (ClientID, FirstName, LastName, Phone, Gmail, Cin, Gender,StartDate)"
-                            + "VALUES(?,?,?,?,?,?,?,?)";
+                    String sql = "INSERT INTO client (ClientID, FirstName, LastName, Phone, Gmail, Cin, Gender,StartDate,ExpirationDate)"
+                            + "VALUES(?,?,?,?,?,?,?,?,?)";
                     prepare = connect.prepareStatement(sql);
                     prepare.setString(1, FS_ClientId_tf.getText());
                     prepare.setString(2, FS_FirstName_tf.getText());
@@ -413,6 +415,8 @@ public class dashboardController implements Initializable {
                     prepare.setString(6, FS_Cin_tf.getText());
                     prepare.setString(7, (String) FS_Gender_combobox.getSelectionModel().getSelectedItem());
                     prepare.setString(8,String.valueOf(sqldate));
+                    prepare.setString(9,String.valueOf(sqldate));
+
                     prepare.executeUpdate();
                     alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Information Message");
@@ -420,6 +424,7 @@ public class dashboardController implements Initializable {
                     alert.setContentText("Successfully Added!");
                     alert.showAndWait();
                     FollowSubsShowListData();
+                    PaymentShowListData();
                     FollowSubsReset();
                 }
             }
@@ -470,6 +475,7 @@ public class dashboardController implements Initializable {
                     alert.showAndWait();
                     FollowSubsShowListData();
                     FollowSubsReset();
+                    PaymentShowListData();
                 }
             }
         }catch (Exception e) {
@@ -502,8 +508,10 @@ public class dashboardController implements Initializable {
                 alert.setContentText("Are you sure you want to DELETE Client ID: " + FS_ClientId_tf.getText() + "?");
                 Optional<ButtonType> option = alert.showAndWait();
                 if(option.get().equals(ButtonType.OK) ){
-                    Date date = new Date();
-                    java.sql.Date sqldate = new java.sql.Date(date.getTime());
+                    String PaymentsqlUpdate = " DELETE FROM payment WHERE ClientId = '"+FS_ClientId_tf.getText()+"'";
+                    prepare = connect.prepareStatement(PaymentsqlUpdate);
+                    prepare.executeUpdate(PaymentsqlUpdate);
+
                     String sqlUpdate = " DELETE FROM client WHERE ClientId = '"+FS_ClientId_tf.getText()+"'";
                     prepare = connect.prepareStatement(sqlUpdate);
 
@@ -515,6 +523,7 @@ public class dashboardController implements Initializable {
                     alert.showAndWait();
                     FollowSubsShowListData();
                     FollowSubsReset();
+                    PaymentShowListData();
                 }
             }
         }catch (Exception e) {
@@ -603,7 +612,7 @@ public class dashboardController implements Initializable {
             home_form.setVisible(false);
             follow_subsriptions_form.setVisible(false);
             paiement_form.setVisible(true);
-
+             PaymentShowListData();
             Paiement_button.setStyle("-fx-background-color:linear-gradient(to right, #35c41a, #35b121, #349e26, #338b28, #327929);");
             follow_subscriptions_button.setStyle("-fx-background-color:transparent");
             Home_button.setStyle("-fx-background-color:transparent");
@@ -655,6 +664,182 @@ public class dashboardController implements Initializable {
 
     }
 
+    //Payment
+
+    //this function for showing the list that contain client data in tableview
+    private ObservableList<Client> PaymentData;
+    public void PaymentShowListData() {
+        PaymentData= FollowSubsListData();
+        Paiement_col_ClientID.setCellValueFactory(new PropertyValueFactory<>("clientId"));
+        Paiement_col_FirstName.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+        Paiement_col_LastName.setCellValueFactory(new PropertyValueFactory<>("lastName"));
+        Paiement_col_ExpirationDate.setCellValueFactory(new PropertyValueFactory<>("ExpirationDate"));
+        Paiement_tableView.setItems(PaymentData);
+    }
+
+    public void validatePayment()  {
+         connect=Database.connectDB();
+        String verifyPayment = "SELECT COUNT(1) FROM client WHERE ClientID=? AND FirstName=? AND LastName=?";
+        Alert alert;
+        try {
+            prepare = connect.prepareStatement(verifyPayment);
+            prepare.setString(1, Paiement_ClientId_tf.getText());
+            prepare.setString(2, Paiement_firstName.getText());
+            prepare.setString(3, Paiement_lastName.getText());
+             result = prepare.executeQuery();
+            //verifier si client existe dans la base de donnees
+            while (result.next()) {
+                if (result.getInt(1) == 1) {
+                    Date date = new Date();
+                    java.sql.Date sqldate = new java.sql.Date(date.getTime());
+String sqlPaymentID="SELECT COUNT(*) from payment";
+                    prepare = connect.prepareStatement(sqlPaymentID);
+                    result = prepare.executeQuery();
+                    result.next();
+                    int count = result.getInt(1);
+
+                    // Vérifier si la table est vide
+                    if (count == 0) {
+                        String sql="Insert into payment (PaymentID,ClientID,PaymentDate,Mois,Amount) values(1,?,?,?,?)";
+                        prepare = connect.prepareStatement(sql);
+
+                        prepare.setString(1, Paiement_ClientId_tf.getText());
+                        prepare.setString(2,String.valueOf(sqldate));
+                        prepare.setString(3, Paiement_Mois_tf.getText());
+                        prepare.setString(4, Amount_Label.getText());
+                        prepare.executeUpdate();
+                    } else {
+                        String sql="Insert into payment (ClientID,PaymentDate,Mois,Amount) values(?,?,?,?)";
+                        prepare = connect.prepareStatement(sql);
+
+                        prepare.setString(1, Paiement_ClientId_tf.getText());
+                        prepare.setString(2,String.valueOf(sqldate));
+                        prepare.setString(3, Paiement_Mois_tf.getText());
+                        prepare.setString(4, Amount_Label.getText());
+                        prepare.executeUpdate();
+                    }
+                    // Récupérer la date d'expiration
+                    String expdateQuery = "SELECT ExpirationDate FROM client WHERE ClientID = ?";
+                    prepare = connect.prepareStatement(expdateQuery);
+                    prepare.setString(1, Paiement_ClientId_tf.getText());
+                    result = prepare.executeQuery();
+
+                    Date testexpdate = null;
+                    if (result.next()) { // Vérifier s'il y a des résultats
+                        testexpdate = result.getDate("ExpirationDate");
+                    }
+
+           // Récupérer la date de début
+                    String startdateQuery = "SELECT StartDate FROM client WHERE ClientID = ?";
+                    prepare = connect.prepareStatement(startdateQuery);
+                    prepare.setString(1, Paiement_ClientId_tf.getText()); // Paramètre à la position 1
+                    result = prepare.executeQuery();
+
+                    Date teststartdate = null;
+                    if (result.next()) { // Vérifier s'il y a des résultats
+                        teststartdate = result.getDate("StartDate");
+                    }
+
+                     // Vérifier si les dates sont égales
+                    if (testexpdate != null && teststartdate != null && testexpdate.equals(teststartdate)) {
+                       // Nombre de mois à ajouter
+                        int moisAAjouter = Integer.parseInt(Paiement_Mois_tf.getText());
+
+                        // Ajout des mois
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTime(date);
+                        calendar.add(Calendar.MONTH, moisAAjouter);
+                        Date nouvelleDate = calendar.getTime();
+
+                        // Conversion en java.sql.Date
+                        java.sql.Date expirationdate = new java.sql.Date(nouvelleDate.getTime());
+                        String sqlexpdate="UPDATE client SET ExpirationDate = ? WHERE ClientID = ?";
+                        prepare = connect.prepareStatement(sqlexpdate);
+                        prepare.setString(1,String.valueOf(expirationdate) );
+                        prepare.setString(2,Paiement_ClientId_tf.getText());
+                        prepare.executeUpdate();                    }
+                    else{
+                        // Nombre de mois à ajouter
+                        int moisAAjouter = Integer.parseInt(Paiement_Mois_tf.getText());
+
+                        // Ajout des mois
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTime(testexpdate);
+                        calendar.add(Calendar.MONTH, moisAAjouter);
+                        Date nouvelleDate = calendar.getTime();
+
+                        // Conversion en java.sql.Date
+                        java.sql.Date expirationdate = new java.sql.Date(nouvelleDate.getTime());
+                        String sqlexpdate="UPDATE client SET ExpirationDate = ? WHERE ClientID = ?";
+                        prepare = connect.prepareStatement(sqlexpdate);
+                        prepare.setString(1,String.valueOf(expirationdate) );
+                        prepare.setString(2,Paiement_ClientId_tf.getText());
+                        prepare.executeUpdate();
+                    }
+
+
+                    alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Information Message");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Payment Successfully Added!");
+                    alert.showAndWait();
+
+
+                    PaymentShowListData();
+                    Payment_CancelButton();
+
+                } else {
+                    alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error Message");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Invaid payment,Client doesn't exist!");
+                    alert.showAndWait();
+                }
+            }
+        }catch ( Exception e){
+            e.printStackTrace();
+        }
+
+    }
+    public void PaymentButtonOnAction(ActionEvent e)  {
+        Alert alert;
+        if (Paiement_ClientId_tf.getText().isBlank() == false && Paiement_firstName.getText().isBlank() == false
+                && Paiement_lastName.getText().isBlank() == false && Paiement_Mois_tf.getText().isBlank() == false
+                && Amount_Label.getText().isBlank() == false ) {
+            validatePayment();
+        } else {
+            alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error Message");
+            alert.setHeaderText(null);
+            alert.setContentText("Please fill all blank fields");
+            alert.showAndWait();
+
+        }
+    }
+
+    private int Amount;
+    private int Mois;
+    public void paymentAmount(){
+         Mois=Integer.parseInt(Paiement_Mois_tf.getText());
+         if(Mois<=0){
+             Paiement_Mois_tf.setText("1");
+             Amount_Label.setText(String.valueOf(PRICE));
+             Mois=1;
+             Amount=PRICE;
+         }else {
+             Amount=Mois*PRICE;
+             Amount_Label.setText(String.valueOf(Amount));
+         }
+    }
+
+    public void Payment_CancelButton() {
+        Paiement_ClientId_tf.setText("");
+        Paiement_firstName.setText("");
+        Paiement_lastName.setText("");
+        Paiement_Mois_tf.setText("");
+        Amount_Label.setText("");
+    }
+//fin
     public void close() {
         System.exit(0);
     }
@@ -689,5 +874,9 @@ public class dashboardController implements Initializable {
         FollowSubsSelect();
         FollowSubsShowListData();
         FollowSubsGenderList();
+
+        PaymentShowListData();
+
+
     }
 }
