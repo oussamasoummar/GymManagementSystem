@@ -84,6 +84,7 @@ CREATE TABLE `payment` (
   `PaymentId` int NOT NULL AUTO_INCREMENT,
   `ClientId` int DEFAULT NULL,
   `PaymentDate` date DEFAULT NULL,
+  `Amount` int DEFAULT NULL,
   PRIMARY KEY (`PaymentId`),
   KEY `ClientId` (`ClientId`),
   CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`ClientId`) REFERENCES `client` (`ClientId`)
