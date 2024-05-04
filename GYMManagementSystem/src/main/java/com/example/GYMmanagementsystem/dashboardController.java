@@ -676,7 +676,7 @@ public class dashboardController implements Initializable {
         Paiement_col_ExpirationDate.setCellValueFactory(new PropertyValueFactory<>("ExpirationDate"));
         Paiement_tableView.setItems(PaymentData);
     }
-
+    //this function for showing the list that contain client data in tableview
     public void validatePayment()  {
          connect=Database.connectDB();
         String verifyPayment = "SELECT COUNT(1) FROM client WHERE ClientID=? AND FirstName=? AND LastName=?";
@@ -816,7 +816,18 @@ String sqlPaymentID="SELECT COUNT(*) from payment";
 
         }
     }
+    public void PaymentSelect() {
+        Client clientSelected = Paiement_tableView.getSelectionModel().getSelectedItem();
 
+        if (clientSelected == null) {
+            return;
+        }
+
+        Paiement_ClientId_tf.setText(String.valueOf(clientSelected.getClientId()));
+        Paiement_firstName.setText(clientSelected.getFirstName());
+        Paiement_lastName.setText(clientSelected.getLastName());
+
+    }
     private int Amount;
     private int Mois;
     public void paymentAmount(){
@@ -874,7 +885,7 @@ String sqlPaymentID="SELECT COUNT(*) from payment";
         FollowSubsSelect();
         FollowSubsShowListData();
         FollowSubsGenderList();
-
+        PaymentSelect();
         PaymentShowListData();
 
 
