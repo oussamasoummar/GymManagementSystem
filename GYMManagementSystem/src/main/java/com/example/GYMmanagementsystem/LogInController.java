@@ -19,6 +19,7 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class LogInController implements Initializable {
@@ -67,7 +68,7 @@ public class LogInController implements Initializable {
                 alert.showAndWait();
 
                 button_login.getScene().getWindow().hide();
-                Parent root = FXMLLoader.load(getClass().getResource("Dashboard.fxml"));
+                Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("Dashboard.fxml")));
                 Stage stage = new Stage();
                 Scene scene = new Scene(root);
 

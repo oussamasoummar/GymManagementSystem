@@ -85,14 +85,14 @@ public class dashboardController implements Initializable {
     //Start Overview
     // Today's Gain
     public void dashboardTG() {
-        String sql = "SELECT SUM(Amount) AS tadaysGain FROM payment WHERE PaymentDate = CURDATE();";
+        String sql = "SELECT SUM(Amount) AS todaysGain FROM payment WHERE PaymentDate = CURDATE()";
         connect = Database.connectDB();
-        int todaysGain = 0; // Change data type to int
+        int todaysGain = 0; // Change data type to double for currency
         try {
             prepare = connect.prepareStatement(sql);
             result = prepare.executeQuery();
             if (result.next()) {
-                todaysGain = result.getInt("todaysGain") ;
+                todaysGain = result.getInt("todaysGain");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -100,9 +100,10 @@ public class dashboardController implements Initializable {
         dash_tg.setText(String.valueOf(todaysGain));
     }
 
+
     // Today's New Clients
     public void dashboardTNC() {
-        String sql = "SELECT COUNT(*) AS todaysNewClients FROM client WHERE StartDate = CURDATE();";
+        String sql = "SELECT COUNT(*) AS todaysNewClients FROM client WHERE StartDate = CURDATE()";
         connect = Database.connectDB();
         int todaysNewClients = 0;
         try {
@@ -119,7 +120,7 @@ public class dashboardController implements Initializable {
 
     // Today's Clients That Quit
     public void dashboardTCQ() {
-        String sql = "SELECT counter AS todaysClientsQuit FROM QuitHistoric WHERE id = CURDATE();";
+        String sql = "SELECT counter AS todaysClientsQuit FROM QuitHistoric WHERE id = CURDATE()";
         connect = Database.connectDB();
         int todaysClientsQuit = 0;
         try {
@@ -837,6 +838,7 @@ public class dashboardController implements Initializable {
         Paiement_lastName.setText(clientSelected.getLastName());
 
     }
+    @FXML
     private int Amount;
     private int Mois;
     public void paymentAmount(){
