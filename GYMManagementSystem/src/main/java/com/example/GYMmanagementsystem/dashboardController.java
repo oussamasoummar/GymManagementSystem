@@ -85,14 +85,14 @@ public class dashboardController implements Initializable {
     //Start Overview
     // Today's Gain
     public void dashboardTG() {
-        String sql = "SELECT SUM(Amount) AS todayPayNum FROM payment WHERE PaymentDate = CURDATE();";
+        String sql = "SELECT SUM(Amount) AS tadaysGain FROM payment WHERE PaymentDate = CURDATE();";
         connect = Database.connectDB();
         int todaysGain = 0; // Change data type to int
         try {
             prepare = connect.prepareStatement(sql);
             result = prepare.executeQuery();
             if (result.next()) {
-                todaysGain = result.getInt("todayPayNum") ;
+                todaysGain = result.getInt("todaysGain") ;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -119,7 +119,7 @@ public class dashboardController implements Initializable {
 
     // Today's Clients That Quit
     public void dashboardTCQ() {
-        String sql = "SELECT COUNT(*) AS todaysClientsQuit FROM client WHERE QuitDate = CURDATE();";
+        String sql = "SELECT counter AS todaysClientsQuit FROM QuitHistoric WHERE id = CURDATE();";
         connect = Database.connectDB();
         int todaysClientsQuit = 0;
         try {
@@ -133,6 +133,7 @@ public class dashboardController implements Initializable {
         }
         dash_tcq.setText(String.valueOf(todaysClientsQuit));
     }
+
     //End overview
 
     //Start dashboard chart
@@ -150,18 +151,19 @@ public class dashboardController implements Initializable {
         }
         return builder.toString();
     }
+
     public void updateChart() {
         dash_chart.getData().clear();
         String selectedYear = years_list.getSelectionModel().getSelectedItem().toString();
         String selectedCriteria = criterias_list.getSelectionModel().getSelectedItem().toString();
-        if(selectedCriteria == null || selectedYear == null){
+        if (selectedCriteria == null || selectedYear == null) {
             return;
         }
-        dash_chart.setTitle(selectedCriteria +" Chart");
+        dash_chart.setTitle(selectedCriteria + " Chart");
         String sql = "";
 
         sql = switch (selectedCriteria) {
-            case "Income" -> "SELECT YEAR(paymentDate) AS year, MONTH(paymentDate) AS month, COUNT(*) AS numOfPay " +
+            case "Income" -> "SELECT YEAR(paymentDate) AS year, MONTH(paymentDate) AS month, SUM(Amount) AS income " +
                     "FROM payment " +
                     "WHERE paymentDate BETWEEN ? AND ? " +
                     "GROUP BY YEAR(paymentDate), MONTH(paymentDate) " +
@@ -171,10 +173,10 @@ public class dashboardController implements Initializable {
                     "WHERE StartDate BETWEEN ? AND ? " +
                     "GROUP BY YEAR(StartDate), MONTH(StartDate) " +
                     "ORDER BY year, month";
-            case "Quit Clients" -> "SELECT YEAR(QuitDate) AS year, MONTH(QuitDate) AS month, COUNT(*) AS quitClients " +
-                    "FROM client " +
-                    "WHERE QuitDate BETWEEN ? AND ? " +
-                    "GROUP BY YEAR(QuitDate), MONTH(QuitDate) " +
+            case "Quit Clients" -> "SELECT YEAR(id) AS year, MONTH(id) AS month, SUM(counter) AS quitClients " +
+                    "FROM QuitHistoric " +
+                    "WHERE id BETWEEN ? AND ? " +
+                    "GROUP BY YEAR(id), MONTH(id) " +
                     "ORDER BY year, month";
             default -> null;
         };
@@ -190,12 +192,7 @@ public class dashboardController implements Initializable {
 
             while (result.next()) {
                 String date = result.getString("year") + "-" + result.getString("month");
-                int value = 0;
-                if(selectedCriteria.equals("Income")) {
-                    value = result.getInt("numOfPay") * PRICE;
-                } else {
-                    value = result.getInt(toCamelCase(selectedCriteria));
-                }
+                int value = result.getInt(toCamelCase(selectedCriteria));
                 series.getData().add(new XYChart.Data(date, value));
             }
 
@@ -204,6 +201,7 @@ public class dashboardController implements Initializable {
             e.printStackTrace();
         }
     }
+
 
     //End dashboard chart
 
@@ -484,8 +482,6 @@ public class dashboardController implements Initializable {
     }
     //this function for deleting client from database
     public void FollowSubsDelete(){
-
-
         connect = Database.connectDB();
         try {
             Alert alert;
@@ -505,25 +501,39 @@ public class dashboardController implements Initializable {
                 alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle("Cofirmation Message");
                 alert.setHeaderText(null);
-                alert.setContentText("Are you sure you want to DELETE Client ID: " + FS_ClientId_tf.getText() + "?");
+                alert.setContentText("Are you sure you want to DELETE Client ID: " + FS_ClientId_tf.getText() + " ?");
                 Optional<ButtonType> option = alert.showAndWait();
                 if(option.get().equals(ButtonType.OK) ){
-                    String PaymentsqlUpdate = " DELETE FROM payment WHERE ClientId = '"+FS_ClientId_tf.getText()+"'";
-                    prepare = connect.prepareStatement(PaymentsqlUpdate);
-                    prepare.executeUpdate(PaymentsqlUpdate);
+                    String insertQuitHistoric = "INSERT INTO QuitHistoric (id, counter) VALUES (CURDATE(), 1) " +
+                            "ON DUPLICATE KEY UPDATE counter = counter + 1";
+                    try {
+                        prepare = connect.prepareStatement(insertQuitHistoric);
+                        prepare.executeUpdate();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        // Handle the error
+                    }
 
-                    String sqlUpdate = " DELETE FROM client WHERE ClientId = '"+FS_ClientId_tf.getText()+"'";
-                    prepare = connect.prepareStatement(sqlUpdate);
+                    // Delete the client
+                    String deleteClient = "DELETE FROM client WHERE ClientId = ?";
+                    try {
+                        prepare = connect.prepareStatement(deleteClient);
+                        prepare.setString(1, FS_ClientId_tf.getText());
+                        prepare.executeUpdate();
 
-                    prepare.executeUpdate(sqlUpdate);
-                    alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Information Message");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Successfully Deleted!");
-                    alert.showAndWait();
-                    FollowSubsShowListData();
-                    FollowSubsReset();
-                    PaymentShowListData();
+                        alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Information Message");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Successfully Deleted!");
+                        alert.showAndWait();
+
+                        FollowSubsShowListData();
+                        FollowSubsReset();
+                        PaymentShowListData();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        // Handle the error
+                    }
                 }
             }
         }catch (Exception e) {
@@ -692,7 +702,7 @@ public class dashboardController implements Initializable {
                 if (result.getInt(1) == 1) {
                     Date date = new Date();
                     java.sql.Date sqldate = new java.sql.Date(date.getTime());
-String sqlPaymentID="SELECT COUNT(*) from payment";
+                    String sqlPaymentID="SELECT COUNT(*) from payment";
                     prepare = connect.prepareStatement(sqlPaymentID);
                     result = prepare.executeQuery();
                     result.next();
@@ -700,9 +710,8 @@ String sqlPaymentID="SELECT COUNT(*) from payment";
 
                     // Vérifier si la table est vide
                     if (count == 0) {
-                        String sql="Insert into payment (PaymentID,ClientID,PaymentDate,Mois,Amount) values(1,?,?,?,?)";
+                        String sql="Insert into payment (ClientID,PaymentDate,Mois,Amount) values(?,?,?,?)";
                         prepare = connect.prepareStatement(sql);
-
                         prepare.setString(1, Paiement_ClientId_tf.getText());
                         prepare.setString(2,String.valueOf(sqldate));
                         prepare.setString(3, Paiement_Mois_tf.getText());

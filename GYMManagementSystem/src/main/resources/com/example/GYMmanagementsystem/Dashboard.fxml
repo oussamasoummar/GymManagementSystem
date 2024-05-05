@@ -287,9 +287,9 @@
                                  </styleClass></Button>
                            </children>
                         </AnchorPane>
-                        <AnchorPane fx:id="paiement_form" prefHeight="558.0" prefWidth="906.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <AnchorPane fx:id="paiement_form" prefHeight="558.0" prefWidth="906.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
-                              <AnchorPane prefHeight="523.0" prefWidth="283.0" stylesheets="@DashboardStyle.css">
+                              <AnchorPane layoutX="-12.0" layoutY="1.0" prefHeight="564.0" prefWidth="918.0" stylesheets="@DashboardStyle.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-12.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="1.0">
                                  <styleClass>
                                     <String fx:value="white-bg" />
                                     <String fx:value="shadow" />
@@ -345,7 +345,7 @@
                                           <Font name="Tahoma" size="18.0" />
                                        </font>
                                     </Label>
-                                    <Label fx:id="Amount_Label" layoutX="96.0" layoutY="198.0" prefHeight="31.0" prefWidth="139.0" textFill="#d30a0a">
+                                    <Label fx:id="Amount_Label" layoutX="96.0" layoutY="198.0" prefHeight="31.0" prefWidth="139.0" textFill="#d30a0a" visible="false">
                                        <font>
                                           <Font size="24.0" />
                                        </font>
@@ -358,12 +358,12 @@
                                     <String fx:value="shadow" />
                                  </styleClass>
                                  <children>
-                                    <TableView fx:id="Paiement_tableView" layoutX="66.0" layoutY="11.0" prefHeight="501.0" prefWidth="432.0" stylesheets="@DashboardStyle.css">
+                                    <TableView fx:id="Paiement_tableView" layoutX="66.0" layoutY="11.0" prefHeight="501.0" prefWidth="463.0" stylesheets="@DashboardStyle.css">
                                        <columns>
                                           <TableColumn fx:id="Paiement_col_ClientID" prefWidth="75.0" text="ClientId" />
                                           <TableColumn fx:id="Paiement_col_FirstName" prefWidth="99.0" text="First Name" />
-                                          <TableColumn fx:id="Paiement_col_LastName" prefWidth="106.0" text="Last Name" />
-                                          <TableColumn fx:id="Paiement_col_ExpirationDate" prefWidth="150.0" text="ExpirationDate" />
+                                          <TableColumn fx:id="Paiement_col_LastName" prefWidth="136.0" text="Last Name" />
+                                          <TableColumn fx:id="Paiement_col_ExpirationDate" prefWidth="152.0" text="ExpirationDate" />
                                        </columns>
                                     </TableView>
                                  </children>
