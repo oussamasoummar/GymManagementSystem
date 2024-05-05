@@ -1,23 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon?>
-<?import java.lang.String?>
-<?import javafx.scene.chart.AreaChart?>
-<?import javafx.scene.chart.CategoryAxis?>
-<?import javafx.scene.chart.NumberAxis?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.shape.Line?>
-<?import javafx.scene.text.Font?>
+<?import de.jensd.fx.glyphs.fontawesome.*?>
+<?import java.lang.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
 
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.GYMmanagementsystem.dashboardController">
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.GYMmanagementsystem.dashboardController">
    <children>
       <AnchorPane fx:id="main_form" prefHeight="200.0" prefWidth="200.0">
          <children>
@@ -340,11 +331,12 @@
                                     </Button>
                                     <TextField fx:id="Paiement_firstName" layoutX="120.0" layoutY="70.0" prefHeight="25.0" prefWidth="150.0" styleClass="textfield" stylesheets="@DashboardStyle.css" />
                                     <TextField fx:id="Paiement_lastName" layoutX="120.0" layoutY="106.0" prefHeight="25.0" prefWidth="150.0" styleClass="textfield" stylesheets="@DashboardStyle.css" />
-                                    <Label fx:id="Amount" layoutX="17.0" layoutY="204.0" text="Amount:">
+                                    <Label fx:id="Amount" layoutX="17.0" layoutY="204.0" text="Amount (DH):">
                                        <font>
                                           <Font name="Tahoma" size="18.0" />
                                        </font>
                                     </Label>
+                                    <Label fx:id="Amount_Label" layoutX="133.0" layoutY="198.0" prefHeight="31.0" prefWidth="139.0" textFill="#d30a0a">
                                     <Label fx:id="Amount_Label" layoutX="96.0" layoutY="198.0" prefHeight="31.0" prefWidth="139.0" textFill="#d30a0a" visible="false">
                                        <font>
                                           <Font size="24.0" />
@@ -358,6 +350,7 @@
                                     <String fx:value="shadow" />
                                  </styleClass>
                                  <children>
+                                    <TableView fx:id="Paiement_tableView" layoutX="66.0" layoutY="11.0" onMouseClicked="#PaymentSelect" prefHeight="501.0" prefWidth="432.0" stylesheets="@DashboardStyle.css">
                                     <TableView fx:id="Paiement_tableView" layoutX="66.0" layoutY="11.0" prefHeight="501.0" prefWidth="463.0" stylesheets="@DashboardStyle.css">
                                        <columns>
                                           <TableColumn fx:id="Paiement_col_ClientID" prefWidth="75.0" text="ClientId" />
