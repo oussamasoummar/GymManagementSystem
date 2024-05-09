@@ -678,9 +678,10 @@ public class dashboardController implements Initializable {
     //Payment
 
     //this function for showing the list that contain client data in tableview
-    private ObservableList<Client> PaymentData;
+    private ObservableList<Client> PaymentData = FXCollections.observableArrayList();
     public void PaymentShowListData() {
         PaymentData= FollowSubsListData();
+        FXCollections.sort(PaymentData,new ExpirationDateComparator());
         Paiement_col_ClientID.setCellValueFactory(new PropertyValueFactory<>("clientId"));
         Paiement_col_FirstName.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         Paiement_col_LastName.setCellValueFactory(new PropertyValueFactory<>("lastName"));
