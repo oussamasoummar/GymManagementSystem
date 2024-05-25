@@ -4,8 +4,13 @@ import java.util.Date;
 
 public class ExpirationDateComparator implements Comparator<Client> {
     public int compare(Client c1, Client c2) {
-        Date expDate1 = c1.getExpirationDate();
-        Date expDate2 = c2.getExpirationDate();
-        return expDate1.compareTo(expDate2);
+        if (c1.getExpirationDate().getYear() != c2.getExpirationDate().getYear()) {
+            return (c1.getExpirationDate().getYear() - c2.getExpirationDate().getYear());
+        } else if (c1.getExpirationDate().getMonth() != c2.getExpirationDate().getMonth()) {
+            return (c1.getExpirationDate().getMonth() - c2.getExpirationDate().getMonth());
+        } else if (c1.getExpirationDate().getDay() != c2.getExpirationDate().getDay()) {
+            return (c1.getExpirationDate().getDay() - c2.getExpirationDate().getDay());
+        } else
+           return c1.getLastName().length()-c2.getLastName().length();
     }
 }
