@@ -14,4 +14,8 @@ module com.example.GYMmanagementsystem {
 
     opens com.example.GYMmanagementsystem to javafx.fxml;
     exports com.example.GYMmanagementsystem;
+    exports com.example.GYMmanagementsystem.Utilities;
+    opens com.example.GYMmanagementsystem.Utilities to javafx.fxml;
+    exports com.example.GYMmanagementsystem.Dashboard;
+    opens com.example.GYMmanagementsystem.Dashboard to javafx.fxml;
 }

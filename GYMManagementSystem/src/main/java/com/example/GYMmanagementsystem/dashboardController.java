@@ -1,5 +1,7 @@
 package com.example.GYMmanagementsystem;
 
+import com.example.GYMmanagementsystem.Dashboard.Dashboard;
+import com.example.GYMmanagementsystem.Dashboard.DashUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -11,7 +13,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
@@ -24,10 +25,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.time.Year;
 import java.util.*;
 
-public class dashboardController implements Initializable {
+public class dashboardController implements Initializable, DashUtils {
     @FXML
     private AnchorPane main_form;
     @FXML
@@ -40,173 +40,27 @@ public class dashboardController implements Initializable {
     private  Button Planning_button;
     @FXML
     private Button Paiement_button;
-    //start home form (this part for youssef) you can whatever you want
+    //Start dashboard youssef
+    Dashboard dashboard = new Dashboard();
+    @FXML
+    ComboBox<Integer> yearsListHolder;
+    @FXML
+    ComboBox<String> criteriasListHolder;
     @FXML
     private AnchorPane home_form;
     private final int  PRICE = 100;
     @FXML
     private Label dash_tg;
-    //Today's new clients placeholder
     @FXML
     private Label dash_tnc;
-    //Today's quit clients placeholder
     @FXML
     private Label dash_tcq;
-    //Dashboard chart
     @FXML
     private AreaChart dash_chart;
-    @FXML
-    private ComboBox years_list;
-    @FXML
-    private ComboBox criterias_list;
-    //Get criterias list
-    public void criteriasList(){
-        String criterias []= {"Income","New Clients","Quit Clients"};
-        List<String> criteriasList = new ArrayList<>();
-        for(String data: criterias){
-            criteriasList.add(data);
-        }
-
-        ObservableList listData = FXCollections.observableArrayList(criteriasList);
-        criterias_list.setItems(listData);
+    public void updateChart(){
+        dashboard.updateChart(connect,criteriasListHolder.getSelectionModel().getSelectedItem(),yearsListHolder.getSelectionModel().getSelectedItem(),dash_chart);
     }
-    //Get years list
-    public void yearsList() {
-        List<Integer> yearsList = new ArrayList<>();
-        int currentYear = Year.now().getValue(); // Get the current year
-        for (int i = 0; i < 5; i++) {
-            yearsList.add(currentYear - i); // Add the current year and the 4 previous years
-        }
-
-        ObservableList listData = FXCollections.observableArrayList(yearsList);
-        years_list.setItems(listData);
-    }
-
-    //Start Overview
-    // Today's Gain
-    public void dashboardTG() {
-        String sql = "SELECT SUM(Amount) AS todaysGain FROM payment WHERE PaymentDate = CURDATE()";
-        connect = Database.connectDB();
-        int todaysGain = 0; // Change data type to double for currency
-        try {
-            prepare = connect.prepareStatement(sql);
-            result = prepare.executeQuery();
-            if (result.next()) {
-                todaysGain = result.getInt("todaysGain");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        dash_tg.setText(String.valueOf(todaysGain));
-    }
-
-
-    // Today's New Clients
-    public void dashboardTNC() {
-        String sql = "SELECT COUNT(*) AS todaysNewClients FROM client WHERE StartDate = CURDATE()";
-        connect = Database.connectDB();
-        int todaysNewClients = 0;
-        try {
-            prepare = connect.prepareStatement(sql);
-            result = prepare.executeQuery();
-            if (result.next()) {
-                todaysNewClients = result.getInt("todaysNewClients");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        dash_tnc.setText(String.valueOf(todaysNewClients));
-    }
-
-    // Today's Clients That Quit
-    public void dashboardTCQ() {
-        String sql = "SELECT counter AS todaysClientsQuit FROM QuitHistoric WHERE id = CURDATE()";
-        connect = Database.connectDB();
-        int todaysClientsQuit = 0;
-        try {
-            prepare = connect.prepareStatement(sql);
-            result = prepare.executeQuery();
-            if (result.next()) {
-                todaysClientsQuit = result.getInt("todaysClientsQuit");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        dash_tcq.setText(String.valueOf(todaysClientsQuit));
-    }
-
-    //End overview
-
-    //Start dashboard chart
-    public String toCamelCase(String text){
-        String[] words = text.split("[\\W_]+");
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < words.length; i++) {
-            String word = words[i];
-            if (i == 0) {
-                word = word.isEmpty() ? word : word.toLowerCase();
-            } else {
-                word = word.isEmpty() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1).toLowerCase();
-            }
-            builder.append(word);
-        }
-        return builder.toString();
-    }
-
-    public void updateChart() {
-        dash_chart.getData().clear();
-        String selectedYear = years_list.getSelectionModel().getSelectedItem().toString();
-        String selectedCriteria = criterias_list.getSelectionModel().getSelectedItem().toString();
-        if (selectedCriteria == null || selectedYear == null) {
-            return;
-        }
-        dash_chart.setTitle(selectedCriteria + " Chart");
-        String sql = "";
-
-        sql = switch (selectedCriteria) {
-            case "Income" -> "SELECT YEAR(paymentDate) AS year, MONTH(paymentDate) AS month, SUM(Amount) AS income " +
-                    "FROM payment " +
-                    "WHERE paymentDate BETWEEN ? AND ? " +
-                    "GROUP BY YEAR(paymentDate), MONTH(paymentDate) " +
-                    "ORDER BY year DESC, month ASC";
-            case "New Clients" -> "SELECT YEAR(StartDate) AS year, MONTH(StartDate) AS month, COUNT(*) AS newClients " +
-                    "FROM client " +
-                    "WHERE StartDate BETWEEN ? AND ? " +
-                    "GROUP BY YEAR(StartDate), MONTH(StartDate) " +
-                    "ORDER BY year, month";
-            case "Quit Clients" -> "SELECT YEAR(id) AS year, MONTH(id) AS month, SUM(counter) AS quitClients " +
-                    "FROM QuitHistoric " +
-                    "WHERE id BETWEEN ? AND ? " +
-                    "GROUP BY YEAR(id), MONTH(id) " +
-                    "ORDER BY year, month";
-            default -> null;
-        };
-
-        connect = Database.connectDB();
-        XYChart.Series series = new XYChart.Series<>();
-        try {
-            prepare = connect.prepareStatement(sql);
-            // Replace placeholders with the selected year
-            prepare.setString(1, selectedYear + "-01-01"); // Start date of the selected year
-            prepare.setString(2, selectedYear + "-12-31"); // End date of the selected year
-            result = prepare.executeQuery();
-
-            while (result.next()) {
-                String date = result.getString("year") + "-" + result.getString("month");
-                int value = result.getInt(toCamelCase(selectedCriteria));
-                series.getData().add(new XYChart.Data(date, value));
-            }
-
-            dash_chart.getData().add(series);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    //End dashboard chart
-
-    //end home form
+    //End dashboard
 
 
     //start follow subsriptions
@@ -595,16 +449,14 @@ public class dashboardController implements Initializable {
 
             //1- Start Overview
             //Today's gain
-            dashboardTG();
+            dashboard.getTodaysGain(connect,dash_tg);
             //Today's new clients
-            dashboardTNC();
+            dashboard.getTodaysNewClients(connect,dash_tnc);
             //Today's quit clients
-            dashboardTCQ();
+            dashboard.getTodaysQuitClient(connect,dash_tcq);
             //End Overview
 
             //2- Start Dashboard chart
-            criteriasList();
-            yearsList();
             updateChart();
         } else if (event.getSource() == follow_subscriptions_button) {
             home_form.setVisible(false);
@@ -623,7 +475,7 @@ public class dashboardController implements Initializable {
             home_form.setVisible(false);
             follow_subsriptions_form.setVisible(false);
             paiement_form.setVisible(true);
-             PaymentShowListData();
+            PaymentShowListData();
             Paiement_button.setStyle("-fx-background-color:linear-gradient(to right, #35c41a, #35b121, #349e26, #338b28, #327929);");
             follow_subscriptions_button.setStyle("-fx-background-color:transparent");
             Home_button.setStyle("-fx-background-color:transparent");
@@ -690,7 +542,7 @@ public class dashboardController implements Initializable {
     }
     //this function for showing the list that contain client data in tableview
     public void validatePayment()  {
-         connect=Database.connectDB();
+        connect=Database.connectDB();
         String verifyPayment = "SELECT COUNT(1) FROM client WHERE ClientID=? AND FirstName=? AND LastName=?";
         Alert alert;
         try {
@@ -698,7 +550,7 @@ public class dashboardController implements Initializable {
             prepare.setString(1, Paiement_ClientId_tf.getText());
             prepare.setString(2, Paiement_firstName.getText());
             prepare.setString(3, Paiement_lastName.getText());
-             result = prepare.executeQuery();
+            result = prepare.executeQuery();
             //verifier si client existe dans la base de donnees
             while (result.next()) {
                 if (result.getInt(1) == 1) {
@@ -740,7 +592,7 @@ public class dashboardController implements Initializable {
                         testexpdate = result.getDate("ExpirationDate");
                     }
 
-           // Récupérer la date de début
+                    // Récupérer la date de début
                     String startdateQuery = "SELECT StartDate FROM client WHERE ClientID = ?";
                     prepare = connect.prepareStatement(startdateQuery);
                     prepare.setString(1, Paiement_ClientId_tf.getText()); // Paramètre à la position 1
@@ -751,9 +603,9 @@ public class dashboardController implements Initializable {
                         teststartdate = result.getDate("StartDate");
                     }
 
-                     // Vérifier si les dates sont égales
+                    // Vérifier si les dates sont égales
                     if (testexpdate != null && teststartdate != null && testexpdate.equals(teststartdate)) {
-                       // Nombre de mois à ajouter
+                        // Nombre de mois à ajouter
                         int moisAAjouter = Integer.parseInt(Paiement_Mois_tf.getText());
 
                         // Ajout des mois
@@ -843,16 +695,16 @@ public class dashboardController implements Initializable {
     private int Amount;
     private int Mois;
     public void paymentAmount(){
-         Mois=Integer.parseInt(Paiement_Mois_tf.getText());
-         if(Mois<=0){
-             Paiement_Mois_tf.setText("1");
-             Amount_Label.setText(String.valueOf(PRICE));
-             Mois=1;
-             Amount=PRICE;
-         }else {
-             Amount=Mois*PRICE;
-             Amount_Label.setText(String.valueOf(Amount));
-         }
+        Mois=Integer.parseInt(Paiement_Mois_tf.getText());
+        if(Mois<=0){
+            Paiement_Mois_tf.setText("1");
+            Amount_Label.setText(String.valueOf(PRICE));
+            Mois=1;
+            Amount=PRICE;
+        }else {
+            Amount=Mois*PRICE;
+            Amount_Label.setText(String.valueOf(Amount));
+        }
     }
 
     public void Payment_CancelButton() {
@@ -862,7 +714,7 @@ public class dashboardController implements Initializable {
         Paiement_Mois_tf.setText("");
         Amount_Label.setText("");
     }
-//fin
+    //fin
     public void close() {
         System.exit(0);
     }
@@ -872,27 +724,20 @@ public class dashboardController implements Initializable {
         stage.setIconified(true);
     }
 
-
-
-
-
-
-
-
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         //I- Dashboard
         //1- Start Overview
+
+        dashboard.populateCreteriasList(criteriasListHolder);
+        dashboard.populateYearsList(yearsListHolder);
         //Today's gain
-        dashboardTG();
+        dashboard.getTodaysGain(connect,dash_tg);
         //Today's new clients
-        dashboardTNC();
+        dashboard.getTodaysNewClients(connect,dash_tnc);
         //Today's quit clients
-        dashboardTCQ();
+        dashboard.getTodaysQuitClient(connect,dash_tcq);
         //2- Dashboard chart
-        criteriasList();
-        yearsList();
         dash_chart.setTitle("");
         FollowSubsSelect();
         FollowSubsShowListData();

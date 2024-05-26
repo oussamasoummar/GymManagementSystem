@@ -25,9 +25,9 @@
                <top>
                   <AnchorPane prefHeight="35.0" prefWidth="1100.0" styleClass="semi-top-form" stylesheets="@DashboardStyle.css" BorderPane.alignment="CENTER">
                      <children>
-                        <AnchorPane layoutX="0.6666666666666666" layoutY="-2.0" prefHeight="41.0" prefWidth="1100.0" styleClass="top-form" stylesheets="@DashboardStyle.css" AnchorPane.bottomAnchor="-4.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="-2.0">
+                        <AnchorPane layoutY="4.0" prefHeight="35.0" prefWidth="1100.0" styleClass="top-form" stylesheets="@DashboardStyle.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
-                              <FontAwesomeIcon glyphName="USERS" layoutX="9.0" layoutY="20.0" size="1.5em" />
+                              <FontAwesomeIcon glyphName="USERS" layoutX="8.0" layoutY="23.0" size="1.5em" />
                               <Label layoutX="36.0" layoutY="3.0" prefHeight="23.0" prefWidth="187.0" text="GYM Management System" />
                               <Button layoutX="1023.0" layoutY="4.0" mnemonicParsing="false" onAction="#close" prefHeight="24.0" prefWidth="49.0" styleClass="close" stylesheets="@DashboardStyle.css" AnchorPane.rightAnchor="3.0" AnchorPane.topAnchor="3.0">
                                  <graphic>
@@ -199,8 +199,8 @@
                                                 <NumberAxis side="LEFT" />
                                              </yAxis>
                                           </AreaChart>
-                                          <ComboBox fx:id="years_list" layoutX="30.0" layoutY="251.0" onAction="#updateChart" prefWidth="150.0" promptText="Select Year" />
-                                          <ComboBox fx:id="criterias_list" layoutX="204.0" layoutY="251.0" onAction="#updateChart" prefWidth="150.0" promptText="Select Criteria" />
+                                          <ComboBox fx:id="yearsListHolder" layoutX="30.0" layoutY="251.0" onAction="#updateChart" prefWidth="150.0" promptText="Select Year" />
+                                          <ComboBox fx:id="criteriasListHolder" layoutX="204.0" layoutY="251.0" onAction="#updateChart" prefWidth="150.0" promptText="Select Criteria" />
                                        </children>
                                     </AnchorPane>
                                  </children>
