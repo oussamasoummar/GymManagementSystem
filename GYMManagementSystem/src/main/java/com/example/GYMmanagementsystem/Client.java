@@ -24,6 +24,7 @@ public class Client {
         this.startDate = startDate;
         this.ExpirationDate=ExpirationDate;
     }
+    public Client(){}
 
     public Integer getClientId(){
         return clientId;
@@ -55,4 +56,19 @@ public class Client {
         return ExpirationDate;
     }
 
+    public void setClientId(Integer clientId) {
+        this.clientId = clientId;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        ExpirationDate = expirationDate;
+    }
 }

@@ -528,7 +528,9 @@ public class dashboardController implements Initializable, DashUtils {
     }
 
     //Payment
-
+    private Database databaseHandler = new Database();
+    private PaymentValidator paymentValidator = new PaymentValidator(databaseHandler);
+    private PaymentService paymentService = new PaymentService(databaseHandler);
     //this function for showing the list that contain client data in tableview
     private ObservableList<Client> PaymentData = FXCollections.observableArrayList();
     public void PaymentShowListData() {
@@ -540,161 +542,68 @@ public class dashboardController implements Initializable, DashUtils {
         Paiement_col_ExpirationDate.setCellValueFactory(new PropertyValueFactory<>("ExpirationDate"));
         Paiement_tableView.setItems(PaymentData);
     }
+
     //this function for showing the list that contain client data in tableview
-    public void validatePayment()  {
-        connect=Database.connectDB();
-        String verifyPayment = "SELECT COUNT(1) FROM client WHERE ClientID=? AND FirstName=? AND LastName=?";
-        Alert alert;
-        try {
-            prepare = connect.prepareStatement(verifyPayment);
-            prepare.setString(1, Paiement_ClientId_tf.getText());
-            prepare.setString(2, Paiement_firstName.getText());
-            prepare.setString(3, Paiement_lastName.getText());
-            result = prepare.executeQuery();
-            //verifier si client existe dans la base de donnees
-            while (result.next()) {
-                if (result.getInt(1) == 1) {
-                    Date date = new Date();
-                    java.sql.Date sqldate = new java.sql.Date(date.getTime());
-                    String sqlPaymentID="SELECT COUNT(*) from payment";
-                    prepare = connect.prepareStatement(sqlPaymentID);
-                    result = prepare.executeQuery();
-                    result.next();
-                    int count = result.getInt(1);
+    public void PaymentButtonOnAction() {
+        if (isFormValid()) {
+            String clientId = Paiement_ClientId_tf.getText();
+            String firstName = Paiement_firstName.getText();
+            String lastName = Paiement_lastName.getText();
+            int months = Integer.parseInt(Paiement_Mois_tf.getText());
+            int amount = months * PRICE;
 
-                    // Vérifier si la table est vide
-                    if (count == 0) {
-                        String sql="Insert into payment (ClientID,PaymentDate,Mois,Amount) values(?,?,?,?)";
-                        prepare = connect.prepareStatement(sql);
-                        prepare.setString(1, Paiement_ClientId_tf.getText());
-                        prepare.setString(2,String.valueOf(sqldate));
-                        prepare.setString(3, Paiement_Mois_tf.getText());
-                        prepare.setString(4, Amount_Label.getText());
-                        prepare.executeUpdate();
-                    } else {
-                        String sql="Insert into payment (ClientID,PaymentDate,Mois,Amount) values(?,?,?,?)";
-                        prepare = connect.prepareStatement(sql);
+            if (paymentValidator.validatePayment(clientId, firstName, lastName)) {
+                Client client = new Client();
+                client.setClientId(Integer.parseInt(clientId));
+                client.setFirstName(firstName);
+                client.setLastName(lastName);
+                paymentService.processPayment(client, months, amount);
 
-                        prepare.setString(1, Paiement_ClientId_tf.getText());
-                        prepare.setString(2,String.valueOf(sqldate));
-                        prepare.setString(3, Paiement_Mois_tf.getText());
-                        prepare.setString(4, Amount_Label.getText());
-                        prepare.executeUpdate();
-                    }
-                    // Récupérer la date d'expiration
-                    String expdateQuery = "SELECT ExpirationDate FROM client WHERE ClientID = ?";
-                    prepare = connect.prepareStatement(expdateQuery);
-                    prepare.setString(1, Paiement_ClientId_tf.getText());
-                    result = prepare.executeQuery();
-
-                    Date testexpdate = null;
-                    if (result.next()) { // Vérifier s'il y a des résultats
-                        testexpdate = result.getDate("ExpirationDate");
-                    }
-
-                    // Récupérer la date de début
-                    String startdateQuery = "SELECT StartDate FROM client WHERE ClientID = ?";
-                    prepare = connect.prepareStatement(startdateQuery);
-                    prepare.setString(1, Paiement_ClientId_tf.getText()); // Paramètre à la position 1
-                    result = prepare.executeQuery();
-
-                    Date teststartdate = null;
-                    if (result.next()) { // Vérifier s'il y a des résultats
-                        teststartdate = result.getDate("StartDate");
-                    }
-
-                    // Vérifier si les dates sont égales
-                    if (testexpdate != null && teststartdate != null && testexpdate.equals(teststartdate)) {
-                        // Nombre de mois à ajouter
-                        int moisAAjouter = Integer.parseInt(Paiement_Mois_tf.getText());
-
-                        // Ajout des mois
-                        Calendar calendar = Calendar.getInstance();
-                        calendar.setTime(date);
-                        calendar.add(Calendar.MONTH, moisAAjouter);
-                        Date nouvelleDate = calendar.getTime();
-
-                        // Conversion en java.sql.Date
-                        java.sql.Date expirationdate = new java.sql.Date(nouvelleDate.getTime());
-                        String sqlexpdate="UPDATE client SET ExpirationDate = ? WHERE ClientID = ?";
-                        prepare = connect.prepareStatement(sqlexpdate);
-                        prepare.setString(1,String.valueOf(expirationdate) );
-                        prepare.setString(2,Paiement_ClientId_tf.getText());
-                        prepare.executeUpdate();                    }
-                    else{
-                        // Nombre de mois à ajouter
-                        int moisAAjouter = Integer.parseInt(Paiement_Mois_tf.getText());
-
-                        // Ajout des mois
-                        Calendar calendar = Calendar.getInstance();
-                        calendar.setTime(testexpdate);
-                        calendar.add(Calendar.MONTH, moisAAjouter);
-                        Date nouvelleDate = calendar.getTime();
-
-                        // Conversion en java.sql.Date
-                        java.sql.Date expirationdate = new java.sql.Date(nouvelleDate.getTime());
-                        String sqlexpdate="UPDATE client SET ExpirationDate = ? WHERE ClientID = ?";
-                        prepare = connect.prepareStatement(sqlexpdate);
-                        prepare.setString(1,String.valueOf(expirationdate) );
-                        prepare.setString(2,Paiement_ClientId_tf.getText());
-                        prepare.executeUpdate();
-                    }
-
-
-                    alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Information Message");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Payment Successfully Added!");
-                    alert.showAndWait();
-
-
-                    PaymentShowListData();
-                    Payment_CancelButton();
-
-                } else {
-                    alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Error Message");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Invaid payment,Client doesn't exist!");
-                    alert.showAndWait();
-                }
+                showAlert(Alert.AlertType.INFORMATION, "Information Message", "Payment Successfully Added!");
+                PaymentShowListData();
+                Payment_CancelButton();
             }
-        }catch ( Exception e){
-            e.printStackTrace();
-        }
-
-    }
-    public void PaymentButtonOnAction(ActionEvent e)  {
-        Alert alert;
-        if (Paiement_ClientId_tf.getText().isBlank() == false && Paiement_firstName.getText().isBlank() == false
-                && Paiement_lastName.getText().isBlank() == false && Paiement_Mois_tf.getText().isBlank() == false
-                && Amount_Label.getText().isBlank() == false ) {
-            validatePayment();
         } else {
-            alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error Message");
-            alert.setHeaderText(null);
-            alert.setContentText("Please fill all blank fields");
-            alert.showAndWait();
-
+            showAlert(Alert.AlertType.ERROR, "Error Message", "Please fill all blank fields");
         }
     }
+
     public void PaymentSelect() {
         Client clientSelected = Paiement_tableView.getSelectionModel().getSelectedItem();
-
-        if (clientSelected == null) {
-            return;
+        if (clientSelected != null) {
+            Paiement_ClientId_tf.setText(String.valueOf(clientSelected.getClientId()));
+            Paiement_firstName.setText(clientSelected.getFirstName());
+            Paiement_lastName.setText(clientSelected.getLastName());
         }
-
-        Paiement_ClientId_tf.setText(String.valueOf(clientSelected.getClientId()));
-        Paiement_firstName.setText(clientSelected.getFirstName());
-        Paiement_lastName.setText(clientSelected.getLastName());
-
     }
-    @FXML
-    private int Amount;
-    private int Mois;
+
+    public void Payment_CancelButton() {
+        Paiement_ClientId_tf.setText("");
+        Paiement_firstName.setText("");
+        Paiement_lastName.setText("");
+        Paiement_Mois_tf.setText("");
+        Amount_Label.setText("");
+    }
+
+    private boolean isFormValid() {
+        return !Paiement_ClientId_tf.getText().isBlank()
+                && !Paiement_firstName.getText().isBlank()
+                && !Paiement_lastName.getText().isBlank()
+                && !Paiement_Mois_tf.getText().isBlank()
+                && !Amount_Label.getText().isBlank();
+    }
+
+    private void showAlert(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
     public void paymentAmount(){
+        int Mois;
+        int Amount;
         Mois=Integer.parseInt(Paiement_Mois_tf.getText());
         if(Mois<=0){
             Paiement_Mois_tf.setText("1");
@@ -707,13 +616,6 @@ public class dashboardController implements Initializable, DashUtils {
         }
     }
 
-    public void Payment_CancelButton() {
-        Paiement_ClientId_tf.setText("");
-        Paiement_firstName.setText("");
-        Paiement_lastName.setText("");
-        Paiement_Mois_tf.setText("");
-        Amount_Label.setText("");
-    }
     //fin
     public void close() {
         System.exit(0);
