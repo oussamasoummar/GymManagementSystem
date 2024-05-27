@@ -1,8 +1,7 @@
-package Payment;
+package com.example.GYMmanagementsystem.Payment;
 import com.example.GYMmanagementsystem.Client;
 
 import java.util.Comparator;
-import java.util.Date;
 
 public class ExpirationDateComparator implements Comparator<Client> {
     public int compare(Client c1, Client c2) {

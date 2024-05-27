@@ -1,6 +1,7 @@
-package Payment;
+package com.example.GYMmanagementsystem.Payment;
 import com.example.GYMmanagementsystem.Client;
 import com.example.GYMmanagementsystem.Database;
+import javafx.scene.control.Alert;
 
 import java.sql.Date;
 import java.util.Calendar;
@@ -24,6 +25,29 @@ public class PaymentService {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+    public boolean validatePayment(String clientId, String firstName, String lastName) {
+        String query = "SELECT COUNT(1) FROM client WHERE ClientID=? AND FirstName=? AND LastName=?";
+        try {
+            ResultSet result = databaseHandler.executeQuery(query, clientId, firstName, lastName);
+            if (result.next() && result.getInt(1) == 1) {
+                return true;
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Error Message", "Invalid payment, Client doesn't exist!");
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private void showAlert(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     private void updateExpirationDate(int clientId, int monthsToAdd) throws SQLException {

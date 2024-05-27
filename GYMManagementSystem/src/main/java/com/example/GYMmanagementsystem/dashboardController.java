@@ -1,8 +1,7 @@
 package com.example.GYMmanagementsystem;
 
-import Payment.ExpirationDateComparator;
-import Payment.PaymentService;
-import Payment.PaymentValidator;
+import com.example.GYMmanagementsystem.Payment.ExpirationDateComparator;
+import com.example.GYMmanagementsystem.Payment.PaymentService;
 import com.example.GYMmanagementsystem.Dashboard.Dashboard;
 import com.example.GYMmanagementsystem.Dashboard.DashUtils;
 import javafx.collections.FXCollections;
@@ -530,9 +529,8 @@ public class dashboardController implements Initializable, DashUtils {
 
     }
 
-    //Payment
+    //com.example.GYMmanagementsystem.Payment
     private Database databaseHandler = new Database();
-    private PaymentValidator paymentValidator = new PaymentValidator(databaseHandler);
     private PaymentService paymentService = new PaymentService(databaseHandler);
     //this function for showing the list that contain client data in tableview
     private ObservableList<Client> PaymentData = FXCollections.observableArrayList();
@@ -555,7 +553,7 @@ public class dashboardController implements Initializable, DashUtils {
             int months = Integer.parseInt(Paiement_Mois_tf.getText());
             int amount =Integer.parseInt(Amount_Label.getText()) ;
 
-            if (paymentValidator.validatePayment(clientId, firstName, lastName)) {
+            if (paymentService.validatePayment(clientId, firstName, lastName)) {
                 Client client = new Client();
                 client.setClientId(Integer.parseInt(clientId));
                 client.setFirstName(firstName);

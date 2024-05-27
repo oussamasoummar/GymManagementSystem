@@ -18,6 +18,6 @@ module com.example.GYMmanagementsystem {
     opens com.example.GYMmanagementsystem.Utilities to javafx.fxml;
     exports com.example.GYMmanagementsystem.Dashboard;
     opens com.example.GYMmanagementsystem.Dashboard to javafx.fxml;
-    exports Payment;
-    opens Payment to javafx.fxml;
+    exports com.example.GYMmanagementsystem.Payment;
+    opens com.example.GYMmanagementsystem.Payment to javafx.fxml;
 }
