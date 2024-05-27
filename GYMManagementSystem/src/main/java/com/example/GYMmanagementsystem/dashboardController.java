@@ -1,5 +1,8 @@
 package com.example.GYMmanagementsystem;
 
+import Payment.ExpirationDateComparator;
+import Payment.PaymentService;
+import Payment.PaymentValidator;
 import com.example.GYMmanagementsystem.Dashboard.Dashboard;
 import com.example.GYMmanagementsystem.Dashboard.DashUtils;
 import javafx.collections.FXCollections;
@@ -550,7 +553,7 @@ public class dashboardController implements Initializable, DashUtils {
             String firstName = Paiement_firstName.getText();
             String lastName = Paiement_lastName.getText();
             int months = Integer.parseInt(Paiement_Mois_tf.getText());
-            int amount = months * PRICE;
+            int amount =Integer.parseInt(Amount_Label.getText()) ;
 
             if (paymentValidator.validatePayment(clientId, firstName, lastName)) {
                 Client client = new Client();
