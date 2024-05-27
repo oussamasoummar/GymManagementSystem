@@ -30,6 +30,7 @@ import java.sql.Statement;
 import java.util.*;
 
 public class dashboardController implements Initializable, DashUtils {
+    //Commun attributes
     @FXML
     private AnchorPane main_form;
     @FXML
@@ -39,18 +40,17 @@ public class dashboardController implements Initializable, DashUtils {
     @FXML
     private Button follow_subscriptions_button;
     @FXML
-    private  Button Planning_button;
-    @FXML
     private Button Paiement_button;
-    //Start dashboard youssef
-    Dashboard dashboard = new Dashboard();
+    private final int  PRICE = 100;
+    private Database databaseHandler = new Database();
+    //Dashboard
+    Dashboard dashboard = new Dashboard(databaseHandler);
     @FXML
     ComboBox<Integer> yearsListHolder;
     @FXML
     ComboBox<String> criteriasListHolder;
     @FXML
     private AnchorPane home_form;
-    private final int  PRICE = 100;
     @FXML
     private Label dash_tg;
     @FXML
@@ -60,7 +60,7 @@ public class dashboardController implements Initializable, DashUtils {
     @FXML
     private AreaChart dash_chart;
     public void updateChart(){
-        dashboard.updateChart(connect,criteriasListHolder.getSelectionModel().getSelectedItem(),yearsListHolder.getSelectionModel().getSelectedItem(),dash_chart);
+        dashboard.updateChart(databaseHandler,criteriasListHolder.getSelectionModel().getSelectedItem(),yearsListHolder.getSelectionModel().getSelectedItem(),dash_chart);
     }
     //End dashboard
 
@@ -115,7 +115,7 @@ public class dashboardController implements Initializable, DashUtils {
 
 
 
-    //and here for paiement karim and maroune you can modify whatever you want
+    //paiement karim and maroune
     @FXML
     private AnchorPane paiement_form;
     @FXML
@@ -451,11 +451,11 @@ public class dashboardController implements Initializable, DashUtils {
 
             //1- Start Overview
             //Today's gain
-            dashboard.getTodaysGain(connect,dash_tg);
+            dashboard.getTodaysGain(dash_tg);
             //Today's new clients
-            dashboard.getTodaysNewClients(connect,dash_tnc);
+            dashboard.getTodaysNewClients(dash_tnc);
             //Today's quit clients
-            dashboard.getTodaysQuitClient(connect,dash_tcq);
+            dashboard.getTodaysQuitClient(dash_tcq);
             //End Overview
 
             //2- Start Dashboard chart
@@ -530,7 +530,6 @@ public class dashboardController implements Initializable, DashUtils {
     }
 
     //com.example.GYMmanagementsystem.Payment
-    private Database databaseHandler = new Database();
     private PaymentService paymentService = new PaymentService(databaseHandler);
     //this function for showing the list that contain client data in tableview
     private ObservableList<Client> PaymentData = FXCollections.observableArrayList();
@@ -635,11 +634,11 @@ public class dashboardController implements Initializable, DashUtils {
         dashboard.populateCreteriasList(criteriasListHolder);
         dashboard.populateYearsList(yearsListHolder);
         //Today's gain
-        dashboard.getTodaysGain(connect,dash_tg);
+        dashboard.getTodaysGain(dash_tg);
         //Today's new clients
-        dashboard.getTodaysNewClients(connect,dash_tnc);
+        dashboard.getTodaysNewClients(dash_tnc);
         //Today's quit clients
-        dashboard.getTodaysQuitClient(connect,dash_tcq);
+        dashboard.getTodaysQuitClient(dash_tcq);
         //2- Dashboard chart
         dash_chart.setTitle("");
         FollowSubsSelect();
@@ -647,7 +646,5 @@ public class dashboardController implements Initializable, DashUtils {
         FollowSubsGenderList();
         PaymentSelect();
         PaymentShowListData();
-
-
     }
 }

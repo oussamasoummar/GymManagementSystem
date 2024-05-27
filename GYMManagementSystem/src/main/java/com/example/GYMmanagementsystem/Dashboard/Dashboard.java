@@ -1,5 +1,6 @@
 package com.example.GYMmanagementsystem.Dashboard;
 
+import com.example.GYMmanagementsystem.Database;
 import com.example.GYMmanagementsystem.Utilities.Chart;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.control.ComboBox;
@@ -17,6 +18,7 @@ public class Dashboard implements DashUtils {
     private List<String> creteriasList;
     private List<Integer> yearsList;
     private final int INTEREST_YEARS = 5;
+    Database database;
 
     public void populateCreteriasList(ComboBox<String> criteriasListHolder) {
         populateComboBox(creteriasList, criteriasListHolder);
@@ -26,19 +28,19 @@ public class Dashboard implements DashUtils {
         populateComboBox(yearsList, yearsListHolder);
     }
 
-    public void getTodaysGain(Connection connect, Label label) {
-        fetchDataAndUpdateLabel(connect, "SELECT SUM(Amount) AS todaysGain FROM payment WHERE PaymentDate = CURDATE()", "todaysGain", label);
+    public void getTodaysGain(Label label) {
+        fetchDataAndUpdateLabel(database, "SELECT SUM(Amount) AS todaysGain FROM payment WHERE PaymentDate = CURDATE()", "todaysGain", label);
     }
 
-    public void getTodaysQuitClient(Connection connect, Label label) {
-        fetchDataAndUpdateLabel(connect, "SELECT COUNT(*) AS todaysClientsQuit FROM QuitHistoric WHERE id = CURDATE()", "todaysClientsQuit", label);
+    public void getTodaysQuitClient(Label label) {
+        fetchDataAndUpdateLabel(database, "SELECT COUNT(*) AS todaysClientsQuit FROM QuitHistoric WHERE id = CURDATE()", "todaysClientsQuit", label);
     }
 
-    public void getTodaysNewClients(Connection connect, Label label) {
-        fetchDataAndUpdateLabel(connect, "SELECT COUNT(*) AS todaysNewClients FROM client WHERE StartDate = CURDATE()", "todaysNewClients", label);
+    public void getTodaysNewClients(Label label) {
+        fetchDataAndUpdateLabel(database, "SELECT COUNT(*) AS todaysNewClients FROM client WHERE StartDate = CURDATE()", "todaysNewClients", label);
     }
 
-    public void updateChart(Connection connect, String title, int year, AreaChart<String, Number> dash_chart) {
+    public void updateChart(Database database, String title,int year, AreaChart<String, Number> dash_chart) {
         String tableName = "";
         String logic = "";
         String dateField = "";
@@ -71,22 +73,19 @@ public class Dashboard implements DashUtils {
                 dateField, dateField, logic, tableName, dateField, dateField, dateField, dateField
         );
 
-        try (PreparedStatement prepare = connect.prepareStatement(sql)) {
+        try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDate startDate = LocalDate.of(year, 1, 1);
             LocalDate endDate = LocalDate.of(year, 12, 31);
-            prepare.setString(1, startDate.format(formatter)); // Start date of the selected year
-            prepare.setString(2, endDate.format(formatter)); // End date of the selected year
-
-            try (ResultSet result = prepare.executeQuery()) {
+            ResultSet  result = database.executeQuery(sql,startDate.format(formatter),endDate.format(formatter));
                 updateChart(result, title, dash_chart);
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public Dashboard() {
+    public Dashboard(Database database) {
+        this.database = database;
         final int CURRENT_YEAR = java.time.Year.now().getValue();
         creteriasList = List.of("Income", "New Clients", "Quit Clients");
         yearsList = new ArrayList<>();
