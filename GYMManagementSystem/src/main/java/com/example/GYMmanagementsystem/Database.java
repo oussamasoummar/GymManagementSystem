@@ -15,7 +15,7 @@ public class Database {
     }
     public  static Connection connectDB(){
         try {
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/miniprojet","root","Ouss@m@soummar123");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/miniprojet","youssef","YOUSSEF@123ou");
             return connection;
         }catch (Exception e){e.printStackTrace();}
         return null;

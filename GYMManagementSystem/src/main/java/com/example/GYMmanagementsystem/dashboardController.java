@@ -246,7 +246,7 @@ public class dashboardController implements Initializable, DashUtils {
                 alert.setContentText("Are you sure you want to DELETE Client ID: " + FS_ClientId_tf.getText() + " ?");
                 Optional<ButtonType> option = alert.showAndWait();
                 if(option.get().equals(ButtonType.OK) ){
-                    String insertQuitHistoric = "INSERT INTO QuitHistoric (id, counter) VALUES (CURDATE(), 1) " +
+                    String insertQuitHistoric = "INSERT INTO quithistoric (id, counter) VALUES (CURDATE(), 1) " +
                             "ON DUPLICATE KEY UPDATE counter = counter + 1";
                     try {
                         databaseHandler.executeUpdate(insertQuitHistoric);

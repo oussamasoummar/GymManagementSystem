@@ -11,7 +11,8 @@ public interface Label {
         int resultValue = 0;
         try {
             ResultSet result = database.executeQuery(sql);
-            resultValue = result.getInt(fieldName);
+            if(result.next())
+                resultValue = result.getInt(fieldName);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -33,7 +33,7 @@ public class Dashboard implements DashUtils {
     }
 
     public void getTodaysQuitClient(Label label) {
-        fetchDataAndUpdateLabel(database, "SELECT COUNT(*) AS todaysClientsQuit FROM QuitHistoric WHERE id = CURDATE()", "todaysClientsQuit", label);
+        fetchDataAndUpdateLabel(database, "SELECT COUNT(*) AS todaysClientsQuit FROM quithistoric WHERE id = CURDATE()", "todaysClientsQuit", label);
     }
 
     public void getTodaysNewClients(Label label) {
