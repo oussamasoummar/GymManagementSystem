@@ -1,8 +1,6 @@
 package com.example.GYMmanagementsystem.Payment;
 import com.example.GYMmanagementsystem.Client;
 import com.example.GYMmanagementsystem.Database;
-import javafx.scene.control.Alert;
-
 import java.sql.Date;
 import java.util.Calendar;
 import java.sql.SQLException;
@@ -33,21 +31,12 @@ public class PaymentService {
             if (result.next() && result.getInt(1) == 1) {
                 return true;
             } else {
-                showAlert(Alert.AlertType.ERROR, "Error Message", "Invalid payment, Client doesn't exist!");
                 return false;
             }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
-    }
-
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 
     private void updateExpirationDate(int clientId, int monthsToAdd) throws SQLException {

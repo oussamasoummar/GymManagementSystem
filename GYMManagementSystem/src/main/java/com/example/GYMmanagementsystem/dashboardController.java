@@ -387,8 +387,8 @@ public class dashboardController implements Initializable, DashUtils {
 
     //Payment
     private PaymentService paymentService = new PaymentService(databaseHandler);
-    //this function for showing the list that contain client data in tableview
     private ObservableList<Client> PaymentData = FXCollections.observableArrayList();
+    //this function for showing the list that contain client data in tableview
     public void PaymentShowListData() {
         PaymentData= fSubsriptionubsController.fetchClientData();
         FXCollections.sort(PaymentData,new ExpirationDateComparator());
@@ -398,8 +398,6 @@ public class dashboardController implements Initializable, DashUtils {
         Paiement_col_ExpirationDate.setCellValueFactory(new PropertyValueFactory<>("ExpirationDate"));
         Paiement_tableView.setItems(PaymentData);
     }
-
-    //this function for showing the list that contain client data in tableview
     public void PaymentButtonOnAction() {
         if (isFormValid()) {
             String clientId = Paiement_ClientId_tf.getText();
@@ -418,6 +416,10 @@ public class dashboardController implements Initializable, DashUtils {
                 showAlert(Alert.AlertType.INFORMATION, "Information Message", "Payment Successfully Added!");
                 PaymentShowListData();
                 Payment_CancelButton();
+            }
+            else{
+                showAlert(Alert.AlertType.ERROR, "Error Message", "Invalid payment, Client doesn't exist!");
+
             }
         } else {
             showAlert(Alert.AlertType.ERROR, "Error Message", "Please fill all blank fields");
