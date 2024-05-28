@@ -447,7 +447,13 @@ public class dashboardController implements Initializable, DashUtils,AlertDispla
     public void initialize(URL url, ResourceBundle resourceBundle) {
         //I- Dashboard
         //1- Start Overview
+        home_form.setVisible(true);
+        follow_subsriptions_form.setVisible(false);
+        paiement_form.setVisible(false);
 
+        Home_button.setStyle("-fx-background-color:linear-gradient(to right, #35c41a, #35b121, #349e26, #338b28, #327929);");
+        follow_subscriptions_button.setStyle("-fx-background-color:transparent");
+        Paiement_button.setStyle("-fx-background-color:transparent");
         dashboard.populateCreteriasList(criteriasListHolder);
         dashboard.populateYearsList(yearsListHolder);
         //Today's gain

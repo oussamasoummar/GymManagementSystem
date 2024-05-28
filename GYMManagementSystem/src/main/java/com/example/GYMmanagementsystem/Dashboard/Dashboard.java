@@ -1,13 +1,9 @@
 package com.example.GYMmanagementsystem.Dashboard;
 
 import com.example.GYMmanagementsystem.Database;
-import com.example.GYMmanagementsystem.Utilities.Chart;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -57,7 +53,7 @@ public class Dashboard implements DashUtils {
                 logic = "COUNT(*) AS result";
                 break;
             case "Quit Clients":
-                tableName = "QuitHistoric";
+                tableName = "quithistoric";
                 dateField = "id";
                 logic = "SUM(counter) AS result";
                 break;
@@ -78,7 +74,7 @@ public class Dashboard implements DashUtils {
             LocalDate startDate = LocalDate.of(year, 1, 1);
             LocalDate endDate = LocalDate.of(year, 12, 31);
             ResultSet  result = database.executeQuery(sql,startDate.format(formatter),endDate.format(formatter));
-                updateChart(result, title, dash_chart);
+            updateChart(result, title, dash_chart);
         } catch (Exception e) {
             e.printStackTrace();
         }

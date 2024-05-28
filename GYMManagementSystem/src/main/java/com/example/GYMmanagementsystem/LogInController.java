@@ -46,11 +46,11 @@ public class LogInController implements Initializable , AlertDisplay{
     public void LogIn(){
        String sql = "SELECT username,password FROM admin WHERE username=? AND password=?";
         try {
-            ResultSet result = DatabaseHandler.executeQuery(sql, tf_username.getText(), tf_password.getText());
             if(tf_password.getText().isEmpty() || tf_username.getText().isEmpty()){
                 showAlert(Alert.AlertType.ERROR,"Error Message","Please fill all blank fields");
             }
             else{
+                ResultSet result = DatabaseHandler.executeQuery(sql, tf_username.getText(), tf_password.getText());
                 if(result.next()){
                     showAlert(Alert.AlertType.INFORMATION,"Information Message","Successfully Login");
                 button_login.getScene().getWindow().hide();
