@@ -4,6 +4,7 @@ import com.example.GYMmanagementsystem.Payment.ExpirationDateComparator;
 import com.example.GYMmanagementsystem.Payment.PaymentService;
 import com.example.GYMmanagementsystem.Dashboard.Dashboard;
 import com.example.GYMmanagementsystem.Dashboard.DashUtils;
+import com.example.GYMmanagementsystem.subsriptions.FollowSubsriptionsController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -65,7 +66,9 @@ public class dashboardController implements Initializable, DashUtils {
     //End dashboard
 
 
-    //start follow subsriptions
+    //start followsubsriptions
+
+
     @FXML
     private AnchorPane follow_subsriptions_form;
     @FXML
@@ -144,141 +147,45 @@ public class dashboardController implements Initializable, DashUtils {
     private TableColumn<Client,String> Paiement_col_ExpirationDate;
 
     //data base attributs
-    private Connection connect;
-    private Statement statement;
-    private PreparedStatement prepare;
     private ResultSet result;
-
-
-    public void FollowSubsReset() {
-        FS_ClientId_tf.setText("");
-        FS_FirstName_tf.setText("");
-        FS_LastName_tf.setText("");
-        FS_Gender_combobox.getSelectionModel().clearSelection();
-        FS_Phone_tf.setText("");
-        FS_Gmail_tf.setText("");
-        FS_Cin_tf.setText("");
-    }
-    public void FollowSubsGenderList(){
-        ObservableList<String> options = FXCollections.observableArrayList("male", "female");
-        FS_Gender_combobox.setItems(options);
-    }
-    //this function for extracting the client data from the database and store them into list
-    public ObservableList<Client> FollowSubsListData() {
-
-        ObservableList<Client> listData = FXCollections.observableArrayList();
-        String sql = "SELECT * FROM client";
-
-        connect = Database.connectDB();
-
-        try {
-            prepare = connect.prepareStatement(sql);
-            result = prepare.executeQuery();
-            Client client;
-
-            while (result.next()) {
-                client = new Client(result.getInt("ClientId"),
-                        result.getString("firstName"),
-                        result.getString("lastName"),
-                        result.getString("gender"),
-                        result.getString("phone"),
-                        result.getString("Gmail"),
-                        result.getString("Cin"),
-                        result.getDate("startDate"),result.getDate("ExpirationDate"));
-                listData.add(client);
-
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return listData;
-    }
-    //this function for showing the list that contain client data in tableview
+    FollowSubsriptionsController fSubsriptionubsController = new FollowSubsriptionsController(databaseHandler);
     private ObservableList<Client> clientListData;
-    public void FollowSubsShowListData() {
-        clientListData= FollowSubsListData();
-        FS_TableCol_ClientId.setCellValueFactory(new PropertyValueFactory<>("clientId"));
-        FS_TableCol_FirstName.setCellValueFactory(new PropertyValueFactory<>("firstName"));
-        FS_TableCol_LastName.setCellValueFactory(new PropertyValueFactory<>("lastName"));
-        FS_TableCol_Gender.setCellValueFactory(new PropertyValueFactory<>("gender"));
-        FS_TableCol_Phone.setCellValueFactory(new PropertyValueFactory<>("phone"));
-        FS_TableCol_Gmail.setCellValueFactory(new PropertyValueFactory<>("gmail"));
-        FS_TableCol_Cin.setCellValueFactory(new PropertyValueFactory<>("cin"));
-        FS_TableCol_StartDate.setCellValueFactory(new PropertyValueFactory<>("startDate"));
 
-        FS_Table_View.setItems(clientListData);
 
-    }
-    public void FollowSubsSelect() {
-        Client clientSelected = FS_Table_View.getSelectionModel().getSelectedItem();
-
-        if (clientSelected == null) {
-            return;
-        }
-
-        FS_ClientId_tf.setText(String.valueOf(clientSelected.getClientId()));
-        FS_FirstName_tf.setText(clientSelected.getFirstName());
-        FS_LastName_tf.setText(clientSelected.getLastName());
-        FS_Cin_tf.setText(clientSelected.getCin());
-        FS_Gmail_tf.setText(clientSelected.getGmail());
-        FS_Phone_tf.setText(clientSelected.getPhone());
-    }
-    //this function for adding new client into database
     public void FollowSubsAdd(){
+        try {if(fSubsriptionubsController.isFieldsEmpty(FS_ClientId_tf,  FS_FirstName_tf, FS_LastName_tf,
+                FS_Gender_combobox,  FS_Cin_tf,  FS_Gmail_tf,  FS_Phone_tf)) {
+                showAlert(Alert.AlertType.ERROR, "Error Message", "Please fill all blank fields");
 
-
-        connect = Database.connectDB();
-        try {
-            Alert alert;
-            if (FS_ClientId_tf.getText().isEmpty()
-                    || FS_FirstName_tf.getText().isEmpty()
-                    || FS_LastName_tf.getText().isEmpty()
-                    || FS_Gender_combobox.getSelectionModel().getSelectedItem() == null
-                    || FS_Cin_tf.getText().isEmpty()
-                    || FS_Gmail_tf.getText().isEmpty()
-                    || FS_Phone_tf.getText().isEmpty()){
-                alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error Message");
-                alert.setHeaderText(null);
-                alert.setContentText("Please fill all blank fields");
-                alert.showAndWait();
             }else{
-                String check = "SELECT ClientId FROM client WHERE clientId = '"
-                        + FS_ClientId_tf.getText() + "'";
+                String check = "SELECT ClientId FROM client WHERE clientId = ?";
 
-                statement = connect.createStatement();
-                result = statement.executeQuery(check);
+                String id =FS_ClientId_tf.getText();
+                result = databaseHandler.executeQuery(check,id);
 
                 if (result.next()) {
-                    alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Error Message");
-                    alert.setHeaderText(null);
-                    alert.setContentText("ClienID : " + FS_ClientId_tf.getText() + " was already exist!");
-                    alert.showAndWait();
+                    showAlert(Alert.AlertType.ERROR,"Error Message","ClienID : " + id + " was already exist!");
+
                 } else {
                     Date date = new Date();
                     java.sql.Date sqldate = new java.sql.Date(date.getTime());
                     String sql = "INSERT INTO client (ClientID, FirstName, LastName, Phone, Gmail, Cin, Gender,StartDate,ExpirationDate)"
                             + "VALUES(?,?,?,?,?,?,?,?,?)";
-                    prepare = connect.prepareStatement(sql);
-                    prepare.setString(1, FS_ClientId_tf.getText());
-                    prepare.setString(2, FS_FirstName_tf.getText());
-                    prepare.setString(3, FS_LastName_tf.getText());
-                    prepare.setString(4, FS_Phone_tf.getText());
-                    prepare.setString(5, FS_Gmail_tf.getText());
-                    prepare.setString(6, FS_Cin_tf.getText());
-                    prepare.setString(7, (String) FS_Gender_combobox.getSelectionModel().getSelectedItem());
-                    prepare.setString(8,String.valueOf(sqldate));
-                    prepare.setString(9,String.valueOf(sqldate));
 
-                    prepare.executeUpdate();
-                    alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Information Message");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Successfully Added!");
-                    alert.showAndWait();
-                    FollowSubsShowListData();
+                    id = FS_ClientId_tf.getText();
+                    String firstName = FS_FirstName_tf.getText();
+                    String lastName = FS_LastName_tf.getText();
+                    String phone = FS_Phone_tf.getText();
+                    String gmail = FS_Gmail_tf.getText();
+                    String cin = FS_Cin_tf.getText();
+                    String gender=(String) FS_Gender_combobox.getSelectionModel().getSelectedItem();
+                    String dateSt = String.valueOf(sqldate);
+                    String dateEx=String.valueOf(sqldate);
+                    databaseHandler.executeUpdate(sql,id,firstName,lastName,phone,gmail,cin,gender,dateSt,dateEx);
+                    showAlert(Alert.AlertType.INFORMATION,"Information Message","Successfully Added!");
+
+                    fSubsriptionubsController.ShowListData(clientListData,FS_Table_View,FS_TableCol_ClientId,FS_TableCol_FirstName,FS_TableCol_LastName,
+                            FS_TableCol_Gender,FS_TableCol_Phone,FS_TableCol_Gmail,FS_TableCol_Cin,FS_TableCol_StartDate);
                     PaymentShowListData();
                     FollowSubsReset();
                 }
@@ -289,21 +196,11 @@ public class dashboardController implements Initializable, DashUtils {
     }
     //this function for update client information
     public void FollowSubsUpdate(){
-        connect = Database.connectDB();
         try {
             Alert alert;
-            if (FS_ClientId_tf.getText().isEmpty()
-                    || FS_FirstName_tf.getText().isEmpty()
-                    || FS_LastName_tf.getText().isEmpty()
-                    || FS_Gender_combobox.getSelectionModel().getSelectedItem() == null
-                    || FS_Cin_tf.getText().isEmpty()
-                    || FS_Gmail_tf.getText().isEmpty()
-                    || FS_Phone_tf.getText().isEmpty()){
-                alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error Message");
-                alert.setHeaderText(null);
-                alert.setContentText("Please fill all blank fields");
-                alert.showAndWait();
+            if (fSubsriptionubsController.isFieldsEmpty(FS_ClientId_tf,  FS_FirstName_tf, FS_LastName_tf,
+                    FS_Gender_combobox,  FS_Cin_tf,  FS_Gmail_tf,  FS_Phone_tf)){
+                showAlert(Alert.AlertType.ERROR, "Error Message", "Please fill all blank fields");
             }else{
                 alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle("Cofirmation Message");
@@ -312,23 +209,19 @@ public class dashboardController implements Initializable, DashUtils {
                 Optional<ButtonType> option = alert.showAndWait();
                 if(option.get().equals(ButtonType.OK) ){
                     String sqlUpdate = " UPDATE client SET FirstName = ?, LastName = ?, Phone = ?, Gmail = ?, Cin = ?, Gender = ?"
-                            +"WHERE ClientId ='"+FS_ClientId_tf.getText()+"'";
-                    prepare = connect.prepareStatement(sqlUpdate);
-                    prepare.setString(1, FS_FirstName_tf.getText());
-                    prepare.setString(2, FS_LastName_tf.getText());
-                    prepare.setString(3, FS_Phone_tf.getText());
-                    prepare.setString(4, FS_Gmail_tf.getText());
-                    prepare.setString(5, FS_Cin_tf.getText());
-                    prepare.setString(6, (String) FS_Gender_combobox.getSelectionModel().getSelectedItem());
+                            +"WHERE ClientId = ?";
+                    String firstName = FS_FirstName_tf.getText();
+                    String lastName = FS_LastName_tf.getText();
+                    String phone = FS_Phone_tf.getText();
+                    String gmail = FS_Gmail_tf.getText();
+                    String cin = FS_Cin_tf.getText();
+                    String gender=(String) FS_Gender_combobox.getSelectionModel().getSelectedItem();
+                    String id = FS_ClientId_tf.getText();
 
-
-                    prepare.executeUpdate();
-                    alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Information Message");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Successfully Updated!");
-                    alert.showAndWait();
-                    FollowSubsShowListData();
+                    databaseHandler.executeUpdate(sqlUpdate,firstName,lastName,phone,gmail,cin,gender,id);
+                    showAlert(Alert.AlertType.INFORMATION,"Information Message","Successfully Updated!");
+                    fSubsriptionubsController.ShowListData(clientListData,FS_Table_View,FS_TableCol_ClientId,FS_TableCol_FirstName,FS_TableCol_LastName,
+                            FS_TableCol_Gender,FS_TableCol_Phone,FS_TableCol_Gmail,FS_TableCol_Cin,FS_TableCol_StartDate);
                     FollowSubsReset();
                     PaymentShowListData();
                 }
@@ -339,21 +232,13 @@ public class dashboardController implements Initializable, DashUtils {
     }
     //this function for deleting client from database
     public void FollowSubsDelete(){
-        connect = Database.connectDB();
+
         try {
             Alert alert;
-            if (FS_ClientId_tf.getText().isEmpty()
-                    || FS_FirstName_tf.getText().isEmpty()
-                    || FS_LastName_tf.getText().isEmpty()
-                    || FS_Gender_combobox.getSelectionModel().getSelectedItem() == null
-                    || FS_Cin_tf.getText().isEmpty()
-                    || FS_Gmail_tf.getText().isEmpty()
-                    || FS_Phone_tf.getText().isEmpty()){
-                alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error Message");
-                alert.setHeaderText(null);
-                alert.setContentText("Please fill all blank fields");
-                alert.showAndWait();
+            if (fSubsriptionubsController.isFieldsEmpty(FS_ClientId_tf,  FS_FirstName_tf, FS_LastName_tf,
+                    FS_Gender_combobox,  FS_Cin_tf,  FS_Gmail_tf,  FS_Phone_tf)){
+                showAlert(Alert.AlertType.ERROR,"Error Message","Please fill all blank fields");
+
             }else{
                 alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle("Cofirmation Message");
@@ -364,8 +249,7 @@ public class dashboardController implements Initializable, DashUtils {
                     String insertQuitHistoric = "INSERT INTO QuitHistoric (id, counter) VALUES (CURDATE(), 1) " +
                             "ON DUPLICATE KEY UPDATE counter = counter + 1";
                     try {
-                        prepare = connect.prepareStatement(insertQuitHistoric);
-                        prepare.executeUpdate();
+                        databaseHandler.executeUpdate(insertQuitHistoric);
                     } catch (Exception e) {
                         e.printStackTrace();
                         // Handle the error
@@ -374,17 +258,10 @@ public class dashboardController implements Initializable, DashUtils {
                     // Delete the client
                     String deleteClient = "DELETE FROM client WHERE ClientId = ?";
                     try {
-                        prepare = connect.prepareStatement(deleteClient);
-                        prepare.setString(1, FS_ClientId_tf.getText());
-                        prepare.executeUpdate();
-
-                        alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Information Message");
-                        alert.setHeaderText(null);
-                        alert.setContentText("Successfully Deleted!");
-                        alert.showAndWait();
-
-                        FollowSubsShowListData();
+                        databaseHandler.executeUpdate(deleteClient,FS_ClientId_tf.getText());
+                        showAlert(Alert.AlertType.INFORMATION,"Information Message","Successfully Deleted!");
+                        fSubsriptionubsController.ShowListData(clientListData,FS_Table_View,FS_TableCol_ClientId,FS_TableCol_FirstName,FS_TableCol_LastName,
+                                FS_TableCol_Gender,FS_TableCol_Phone,FS_TableCol_Gmail,FS_TableCol_Cin,FS_TableCol_StartDate);
                         FollowSubsReset();
                         PaymentShowListData();
                     } catch (Exception e) {
@@ -399,45 +276,23 @@ public class dashboardController implements Initializable, DashUtils {
     }
     //this function for searching by name,id,cin,gender
     public void FollowSubsSearch() {
-
-        //the filter are initially all the element matches because of lamdba expression return true
-        FilteredList<Client> filter = new FilteredList<>(clientListData, e -> true);
-
-        FS_search_tf.textProperty().addListener((Observable, oldValue, newValue) -> {
-
-            filter.setPredicate(predicateClient -> {
-
-                if (newValue == null || newValue.isEmpty()) {
-                    return true;
-                }
-
-                String searchKey = newValue.toLowerCase();
-
-                if (predicateClient.getClientId().toString().contains(searchKey)) {
-                    return true;
-                } else if (predicateClient.getFirstName().toLowerCase().contains(searchKey)) {
-                    return true;
-                } else if (predicateClient.getLastName().toLowerCase().contains(searchKey)) {
-                    return true;
-                } else if (predicateClient.getGender().toLowerCase().contains(searchKey)) {
-                    return true;
-                } else if (predicateClient.getPhone().toLowerCase().contains(searchKey)) {
-                    return true;
-                } else if (predicateClient.getCin().toLowerCase().contains(searchKey)) {
-                    return true;
-                } else if (predicateClient.getStartDate() != null && predicateClient.getStartDate().toString().contains(searchKey)) {
-                    return true;
-                } else {
-                    return false;
-                }
-            });
-        });
-
-        SortedList<Client> sortList = new SortedList<>(filter);
-
-        sortList.comparatorProperty().bind(FS_Table_View.comparatorProperty());
-        FS_Table_View.setItems(sortList);
+        fSubsriptionubsController.FollowSubsSearch(clientListData,FS_search_tf,FS_Table_View);
     }
+    public void FollowSubsSelect(){
+        fSubsriptionubsController.SelectItem(FS_Table_View,FS_ClientId_tf,FS_FirstName_tf,FS_LastName_tf,
+                FS_Phone_tf,FS_Gmail_tf,FS_Cin_tf);
+    }
+    public void FollowSubsReset() {
+        FS_ClientId_tf.setText("");
+        FS_FirstName_tf.setText("");
+        FS_LastName_tf.setText("");
+        FS_Gender_combobox.getSelectionModel().clearSelection();
+        FS_Phone_tf.setText("");
+        FS_Gmail_tf.setText("");
+        FS_Cin_tf.setText("");
+    }
+
+
 
     public void switchForm(ActionEvent event) {
         if (event.getSource() == Home_button ) {
@@ -469,8 +324,9 @@ public class dashboardController implements Initializable, DashUtils {
             Home_button.setStyle("-fx-background-color:transparent");
             Paiement_button.setStyle("-fx-background-color:transparent");
 
-            FollowSubsShowListData();
-            FollowSubsGenderList();
+            fSubsriptionubsController.ShowListData(clientListData,FS_Table_View,FS_TableCol_ClientId,FS_TableCol_FirstName,FS_TableCol_LastName,
+                    FS_TableCol_Gender,FS_TableCol_Phone,FS_TableCol_Gmail,FS_TableCol_Cin,FS_TableCol_StartDate);
+            fSubsriptionubsController.setGenderOptions(FS_Gender_combobox);
 
 
         } else if (event.getSource() == Paiement_button) {
@@ -529,12 +385,12 @@ public class dashboardController implements Initializable, DashUtils {
 
     }
 
-    //com.example.GYMmanagementsystem.Payment
+    //Payment
     private PaymentService paymentService = new PaymentService(databaseHandler);
     //this function for showing the list that contain client data in tableview
     private ObservableList<Client> PaymentData = FXCollections.observableArrayList();
     public void PaymentShowListData() {
-        PaymentData= FollowSubsListData();
+        PaymentData= fSubsriptionubsController.fetchClientData();
         FXCollections.sort(PaymentData,new ExpirationDateComparator());
         Paiement_col_ClientID.setCellValueFactory(new PropertyValueFactory<>("clientId"));
         Paiement_col_FirstName.setCellValueFactory(new PropertyValueFactory<>("firstName"));
@@ -641,9 +497,12 @@ public class dashboardController implements Initializable, DashUtils {
         dashboard.getTodaysQuitClient(dash_tcq);
         //2- Dashboard chart
         dash_chart.setTitle("");
-        FollowSubsSelect();
-        FollowSubsShowListData();
-        FollowSubsGenderList();
+        fSubsriptionubsController.SelectItem(FS_Table_View,FS_ClientId_tf,FS_FirstName_tf,FS_LastName_tf,
+                FS_Phone_tf,FS_Gmail_tf,FS_Cin_tf);
+        fSubsriptionubsController.ShowListData(clientListData,FS_Table_View,FS_TableCol_ClientId,FS_TableCol_FirstName,FS_TableCol_LastName,
+                FS_TableCol_Gender,FS_TableCol_Phone,FS_TableCol_Gmail,FS_TableCol_Cin,FS_TableCol_StartDate);
+        //FollowSubsGenderList();
+        fSubsriptionubsController.setGenderOptions(FS_Gender_combobox);
         PaymentSelect();
         PaymentShowListData();
     }

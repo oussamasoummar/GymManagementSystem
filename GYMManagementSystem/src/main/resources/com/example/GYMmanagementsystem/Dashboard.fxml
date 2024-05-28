@@ -115,7 +115,7 @@
                <center>
                   <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                      <children>
-                        <AnchorPane fx:id="home_form" layoutX="-0.6666666666666666" layoutY="2.0" prefHeight="563.0" prefWidth="898.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-1.0" AnchorPane.rightAnchor="9.0" AnchorPane.topAnchor="2.0">
+                        <AnchorPane fx:id="home_form" layoutX="-0.6666666666666666" layoutY="2.0" prefHeight="563.0" prefWidth="898.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-1.0" AnchorPane.rightAnchor="9.0" AnchorPane.topAnchor="2.0">
                            <children>
                               <AnchorPane layoutX="-3.0" layoutY="21.0" prefHeight="524.0" prefWidth="857.0" stylesheets="@DashboardStyle.css">
                                  <styleClass>
@@ -207,7 +207,7 @@
                               </AnchorPane>
                            </children>
                         </AnchorPane>
-                        <AnchorPane fx:id="follow_subsriptions_form" layoutY="11.0" prefHeight="531.0" prefWidth="893.0" stylesheets="@DashboardStyle.css" visible="false">
+                        <AnchorPane fx:id="follow_subsriptions_form" layoutY="11.0" prefHeight="531.0" prefWidth="893.0" stylesheets="@DashboardStyle.css">
                            <styleClass>
                               <String fx:value="top-form" />
                               <String fx:value="shadow" />
