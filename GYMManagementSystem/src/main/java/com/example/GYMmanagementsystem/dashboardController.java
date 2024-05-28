@@ -1,5 +1,4 @@
 package com.example.GYMmanagementsystem;
-
 import com.example.GYMmanagementsystem.Payment.ExpirationDateComparator;
 import com.example.GYMmanagementsystem.Payment.PaymentService;
 import com.example.GYMmanagementsystem.Dashboard.Dashboard;
@@ -7,8 +6,6 @@ import com.example.GYMmanagementsystem.Dashboard.DashUtils;
 import com.example.GYMmanagementsystem.subsriptions.FollowSubsriptionsController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,15 +19,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.*;
-
-public class dashboardController implements Initializable, DashUtils {
+public class dashboardController implements Initializable, DashUtils,AlertDisplay {
     //Commun attributes
     @FXML
     private AnchorPane main_form;
@@ -64,11 +56,7 @@ public class dashboardController implements Initializable, DashUtils {
         dashboard.updateChart(databaseHandler,criteriasListHolder.getSelectionModel().getSelectedItem(),yearsListHolder.getSelectionModel().getSelectedItem(),dash_chart);
     }
     //End dashboard
-
-
     //start followsubsriptions
-
-
     @FXML
     private AnchorPane follow_subsriptions_form;
     @FXML
@@ -114,9 +102,6 @@ public class dashboardController implements Initializable, DashUtils {
     @FXML
     private Button FS_Delete_Button;
     //and here for planning
-
-
-
 
     //paiement karim and maroune
     @FXML
@@ -197,16 +182,11 @@ public class dashboardController implements Initializable, DashUtils {
     //this function for update client information
     public void FollowSubsUpdate(){
         try {
-            Alert alert;
             if (fSubsriptionubsController.isFieldsEmpty(FS_ClientId_tf,  FS_FirstName_tf, FS_LastName_tf,
                     FS_Gender_combobox,  FS_Cin_tf,  FS_Gmail_tf,  FS_Phone_tf)){
                 showAlert(Alert.AlertType.ERROR, "Error Message", "Please fill all blank fields");
             }else{
-                alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("Cofirmation Message");
-                alert.setHeaderText(null);
-                alert.setContentText("Are you sure you want to UPDATE Client ID: " + FS_ClientId_tf.getText() + "?");
-                Optional<ButtonType> option = alert.showAndWait();
+                Optional<ButtonType> option= showAlertForButtom(Alert.AlertType.CONFIRMATION, "Cofirmation Message", "Are you sure you want to UPDATE Client ID: " + FS_ClientId_tf.getText() + "?");
                 if(option.get().equals(ButtonType.OK) ){
                     String sqlUpdate = " UPDATE client SET FirstName = ?, LastName = ?, Phone = ?, Gmail = ?, Cin = ?, Gender = ?"
                             +"WHERE ClientId = ?";
@@ -234,17 +214,12 @@ public class dashboardController implements Initializable, DashUtils {
     public void FollowSubsDelete(){
 
         try {
-            Alert alert;
             if (fSubsriptionubsController.isFieldsEmpty(FS_ClientId_tf,  FS_FirstName_tf, FS_LastName_tf,
                     FS_Gender_combobox,  FS_Cin_tf,  FS_Gmail_tf,  FS_Phone_tf)){
                 showAlert(Alert.AlertType.ERROR,"Error Message","Please fill all blank fields");
 
             }else{
-                alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("Cofirmation Message");
-                alert.setHeaderText(null);
-                alert.setContentText("Are you sure you want to DELETE Client ID: " + FS_ClientId_tf.getText() + " ?");
-                Optional<ButtonType> option = alert.showAndWait();
+                Optional<ButtonType> option= showAlertForButtom(Alert.AlertType.CONFIRMATION, "Cofirmation Message", "Are you sure you want to Delete Client ID: " + FS_ClientId_tf.getText() + "?");
                 if(option.get().equals(ButtonType.OK) ){
                     String insertQuitHistoric = "INSERT INTO quithistoric (id, counter) VALUES (CURDATE(), 1) " +
                             "ON DUPLICATE KEY UPDATE counter = counter + 1";
@@ -344,12 +319,7 @@ public class dashboardController implements Initializable, DashUtils {
     private double x = 0;
     private double y = 0;
     public void logout() {
-
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirmation Message");
-        alert.setHeaderText(null);
-        alert.setContentText("Are you sure you want to logout?");
-        Optional<ButtonType> option = alert.showAndWait();
+        Optional<ButtonType> option= showAlertForButtom(Alert.AlertType.CONFIRMATION, "Cofirmation Message", "Are you sure you want to logout?");
         try {
             if (option.get().equals(ButtonType.OK)) {
 
@@ -425,7 +395,6 @@ public class dashboardController implements Initializable, DashUtils {
             showAlert(Alert.AlertType.ERROR, "Error Message", "Please fill all blank fields");
         }
     }
-
     public void PaymentSelect() {
         Client clientSelected = Paiement_tableView.getSelectionModel().getSelectedItem();
         if (clientSelected != null) {
@@ -434,7 +403,6 @@ public class dashboardController implements Initializable, DashUtils {
             Paiement_lastName.setText(clientSelected.getLastName());
         }
     }
-
     public void Payment_CancelButton() {
         Paiement_ClientId_tf.setText("");
         Paiement_firstName.setText("");
@@ -451,13 +419,6 @@ public class dashboardController implements Initializable, DashUtils {
                 && !Amount_Label.getText().isBlank();
     }
 
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
 
     public void paymentAmount(){
         int Mois;
@@ -473,12 +434,10 @@ public class dashboardController implements Initializable, DashUtils {
             Amount_Label.setText(String.valueOf(Amount));
         }
     }
-
     //fin
     public void close() {
         System.exit(0);
     }
-
     public void minimize() {
         Stage stage = (Stage) main_form.getScene().getWindow();
         stage.setIconified(true);

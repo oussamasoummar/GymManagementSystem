@@ -22,7 +22,7 @@ import java.sql.ResultSet;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
-public class LogInController implements Initializable {
+public class LogInController implements Initializable , AlertDisplay{
     @FXML
     private Button button_login;
     @FXML
@@ -32,9 +32,10 @@ public class LogInController implements Initializable {
     @FXML
     private TextField tf_username;
     //database tools
-    private Connection connect;
-    private PreparedStatement prepare;
-    private ResultSet result ;
+    private Database DatabaseHandler;
+    public LogInController(){
+        this.DatabaseHandler=new Database();
+    }
     private double x = 0;
     private double y = 0;
 
@@ -44,29 +45,14 @@ public class LogInController implements Initializable {
     }
     public void LogIn(){
        String sql = "SELECT username,password FROM admin WHERE username=? AND password=?";
-        connect = Database.connectDB();
         try {
-            prepare = connect.prepareStatement(sql);
-            prepare.setString(1,tf_username.getText());
-            prepare.setString(2,tf_password.getText());
-            result = prepare.executeQuery();
-            Alert alert;
+            ResultSet result = DatabaseHandler.executeQuery(sql, tf_username.getText(), tf_password.getText());
             if(tf_password.getText().isEmpty() || tf_username.getText().isEmpty()){
-                 alert = new Alert(AlertType.ERROR);
-                 alert.setTitle("Error Message");
-                 alert.setHeaderText(null);
-                 alert.setContentText("Please fill all blank fields");
-                 alert.showAndWait();
-
+                showAlert(Alert.AlertType.ERROR,"Error Message","Please fill all blank fields");
             }
             else{
                 if(result.next()){
-                alert = new Alert(AlertType.INFORMATION);
-                alert.setTitle("Information Message");
-                alert.setHeaderText(null);
-                alert.setContentText("Successfully Login");
-                alert.showAndWait();
-
+                    showAlert(Alert.AlertType.INFORMATION,"Information Message","Successfully Login");
                 button_login.getScene().getWindow().hide();
                 Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("Dashboard.fxml")));
                 Stage stage = new Stage();
@@ -87,11 +73,8 @@ public class LogInController implements Initializable {
                 stage.show();
 
             }else{
-                alert = new Alert(AlertType.ERROR);
-                alert.setTitle("Error Message");
-                alert.setHeaderText(null);
-                alert.setContentText("Wrong Username/Password");
-                alert.showAndWait();
+                    showAlert(Alert.AlertType.ERROR,"Error Message","Wrong Username/Password");
+
             }
 
 
